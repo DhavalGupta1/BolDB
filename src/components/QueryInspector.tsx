@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Play, Copy, Check, AlertTriangle, Clock, Terminal, Wrench, Edit2 } from 'lucide-react';
+import { Play, Copy, Check, AlertTriangle, ChevronDown, ChevronUp, Edit2, Wrench, Clock } from 'lucide-react';
 import type { QueryResult } from '../types/database';
 
 interface QueryInspectorProps {
@@ -13,196 +13,86 @@ interface QueryInspectorProps {
 }
 
 export const QueryInspector: React.FC<QueryInspectorProps> = ({
-  currentSql,
-  explanation,
-  isMutation,
-  result,
-  isRunning,
-  onExecute,
-  onAutoFix,
+  currentSql, explanation, isMutation, result, isRunning, onExecute, onAutoFix,
 }) => {
-  const [editableSql, setEditableSql] = useState(currentSql);
-  const [isEditing, setIsEditing] = useState(false);
+  const [editable, setEditable] = useState(currentSql);
+  const [editing, setEditing] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
 
-  // Sync state when new query arrives
-  React.useEffect(() => {
-    setEditableSql(currentSql);
-    setIsEditing(false);
-  }, [currentSql]);
+  React.useEffect(() => { setEditable(currentSql); setEditing(false); }, [currentSql]);
 
-  const handleCopy = () => {
-    navigator.clipboard.writeText(editableSql);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
-  const handleRun = () => {
-    onExecute(editableSql);
-  };
-
-  if (!currentSql) {
-    return null;
-  }
-
+  const copy = () => { navigator.clipboard.writeText(editable); setCopied(true); setTimeout(() => setCopied(false), 1500); };
   const hasError = Boolean(result?.error);
 
-  return (
-    <div className="glass-panel" style={{ padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-      {/* Top bar with metadata */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <Terminal size={15} color="var(--cyan-400)" />
-          <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-muted)' }}>
-            Generated SQL Statement
-          </span>
+  if (!currentSql) return null;
 
-          {isMutation && (
-            <span className="badge badge-rose" style={{ gap: '4px' }}>
-              <AlertTriangle size={11} /> Mutates Data
+  return (
+    <div className="animate-slide-up" style={{
+      background: 'var(--bg-surface)', border: '1px solid var(--border)',
+      borderRadius: 'var(--radius-md)', overflow: 'hidden',
+    }}>
+      {/* Header row */}
+      <div style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        padding: '6px 10px', borderBottom: collapsed ? 'none' : '1px solid var(--border)',
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <button onClick={() => setCollapsed(!collapsed)} className="btn btn-ghost btn-xs" style={{ padding: '2px' }}>
+            {collapsed ? <ChevronDown size={12} /> : <ChevronUp size={12} />}
+          </button>
+          <span className="mono" style={{ fontSize: '0.65rem', color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>sql</span>
+          {isMutation && <span className="badge" style={{ background: 'var(--amber-bg)', color: 'var(--amber)', fontSize: '0.58rem' }}><AlertTriangle size={8} /> write</span>}
+          {result && !hasError && (
+            <span className="mono" style={{ fontSize: '0.63rem', color: 'var(--text-dim)' }}>
+              <Clock size={9} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '2px' }} />{result.executionTimeMs}ms
             </span>
           )}
+        </div>
+        <div style={{ display: 'flex', gap: '1px' }}>
+          <button onClick={() => setEditing(!editing)} className="btn btn-ghost btn-xs"><Edit2 size={11} /></button>
+          <button onClick={copy} className="btn btn-ghost btn-xs">{copied ? <Check size={11} color="var(--green)" /> : <Copy size={11} />}</button>
+          <button onClick={() => onExecute(editable)} disabled={isRunning} className="btn btn-ghost btn-xs"><Play size={11} /></button>
+        </div>
+      </div>
 
-          {result && !hasError && (
-            <span className="badge badge-emerald" style={{ gap: '4px' }}>
-              <Clock size={11} /> {result.executionTimeMs} ms
-            </span>
+      {!collapsed && (
+        <>
+          {editing ? (
+            <textarea value={editable} onChange={(e) => setEditable(e.target.value)} rows={3}
+              className="mono" style={{
+                width: '100%', background: 'transparent', border: 'none', padding: '10px 12px',
+                color: 'var(--text)', fontSize: '0.78rem', outline: 'none', resize: 'vertical',
+              }} />
+          ) : (
+            <pre className="mono" style={{
+              padding: '10px 12px', fontSize: '0.78rem', color: 'var(--text-secondary)',
+              overflowX: 'auto', whiteSpace: 'pre-wrap', lineHeight: 1.6, margin: 0,
+            }}>{editable}</pre>
+          )}
+
+          {explanation && (
+            <div style={{ padding: '0 12px 8px' }}>
+              <span style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>{explanation}</span>
+            </div>
           )}
 
           {hasError && (
-            <span className="badge badge-rose">
-              Execution Error
-            </span>
+            <div style={{
+              margin: '0 10px 10px', padding: '7px 10px', borderRadius: 'var(--radius-sm)',
+              background: 'var(--red-bg)', border: '1px solid rgba(248,113,113,0.12)',
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '6px',
+            }}>
+              <span className="mono" style={{ fontSize: '0.7rem', color: 'var(--red)' }}>{result?.error}</span>
+              {onAutoFix && (
+                <button onClick={() => onAutoFix(editable, result?.error || '')}
+                  className="btn btn-ghost btn-xs" style={{ color: 'var(--red)', gap: '3px', flexShrink: 0 }}>
+                  <Wrench size={10} /> Fix
+                </button>
+              )}
+            </div>
           )}
-        </div>
-
-        {/* Action buttons */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <button
-            onClick={() => setIsEditing(!isEditing)}
-            className={`btn btn-sm ${isEditing ? 'btn-accent' : 'btn-ghost'}`}
-            style={{ fontSize: '0.75rem', padding: '4px 8px' }}
-            title="Toggle direct SQL editing"
-          >
-            <Edit2 size={12} />
-            <span>{isEditing ? 'Done Editing' : 'Edit SQL'}</span>
-          </button>
-
-          <button
-            onClick={handleCopy}
-            className="btn btn-ghost btn-sm"
-            style={{ fontSize: '0.75rem', padding: '4px 8px' }}
-            title="Copy SQL to clipboard"
-          >
-            {copied ? <Check size={12} color="var(--emerald-400)" /> : <Copy size={12} />}
-            <span>{copied ? 'Copied' : 'Copy'}</span>
-          </button>
-
-          <button
-            onClick={handleRun}
-            disabled={isRunning}
-            className="btn btn-primary btn-sm"
-            style={{ fontSize: '0.78rem', padding: '5px 12px', gap: '6px' }}
-          >
-            <Play size={12} />
-            <span>Run SQL</span>
-          </button>
-        </div>
-      </div>
-
-      {/* SQL Code Box */}
-      <div style={{ position: 'relative' }}>
-        {isEditing ? (
-          <textarea
-            value={editableSql}
-            onChange={(e) => setEditableSql(e.target.value)}
-            rows={4}
-            className="font-mono"
-            style={{
-              width: '100%',
-              background: 'var(--bg-input)',
-              border: '1px solid var(--border-medium)',
-              borderRadius: 'var(--radius-md)',
-              padding: '12px 14px',
-              color: 'var(--cyan-400)',
-              fontSize: '0.85rem',
-              outline: 'none',
-              resize: 'vertical',
-            }}
-          />
-        ) : (
-          <pre
-            className="font-mono"
-            style={{
-              background: 'var(--bg-input)',
-              border: '1px solid var(--border-subtle)',
-              borderRadius: 'var(--radius-md)',
-              padding: '12px 14px',
-              fontSize: '0.875rem',
-              color: '#38bdf8',
-              overflowX: 'auto',
-              whiteSpace: 'pre-wrap',
-              lineHeight: 1.6,
-            }}
-          >
-            {editableSql}
-          </pre>
-        )}
-      </div>
-
-      {/* AI Query Explanation */}
-      {explanation && (
-        <div
-          style={{
-            padding: '10px 14px',
-            borderRadius: 'var(--radius-md)',
-            background: 'rgba(99, 102, 241, 0.07)',
-            borderLeft: '3px solid var(--indigo-500)',
-            display: 'flex',
-            alignItems: 'flex-start',
-            gap: '8px',
-          }}
-        >
-          <p style={{ fontSize: '0.825rem', color: 'var(--text-muted)', lineHeight: 1.5, margin: 0 }}>
-            <strong style={{ color: 'var(--text-main)' }}>Explanation: </strong>
-            {explanation}
-          </p>
-        </div>
-      )}
-
-      {/* Error message and Auto-fix option */}
-      {hasError && (
-        <div
-          style={{
-            padding: '12px 14px',
-            borderRadius: 'var(--radius-md)',
-            background: 'rgba(244, 63, 94, 0.1)',
-            border: '1px solid rgba(244, 63, 94, 0.3)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            flexWrap: 'wrap',
-            gap: '8px',
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <AlertTriangle size={16} color="var(--rose-400)" />
-            <span style={{ fontSize: '0.825rem', color: 'var(--rose-400)', fontFamily: 'JetBrains Mono' }}>
-              {result?.error}
-            </span>
-          </div>
-
-          {onAutoFix && (
-            <button
-              onClick={() => onAutoFix(editableSql, result?.error || '')}
-              className="btn btn-sm btn-danger"
-              style={{ fontSize: '0.75rem', padding: '4px 10px', gap: '5px' }}
-            >
-              <Wrench size={12} />
-              <span>Auto-Fix with Gemini</span>
-            </button>
-          )}
-        </div>
+        </>
       )}
     </div>
   );

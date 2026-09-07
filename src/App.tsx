@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { sqliteService } from './services/sqliteService';
 import { geminiService } from './services/geminiService';
-import { Navbar } from './components/Navbar';
-import { Sidebar } from './components/Sidebar';
+import { SchemaDrawer } from './components/SchemaDrawer';
 import { PromptBar } from './components/PromptBar';
 import { QueryInspector } from './components/QueryInspector';
 import { DataGrid } from './components/DataGrid';
@@ -11,430 +10,253 @@ import { FileUploadModal } from './components/FileUploadModal';
 import { ApiKeyModal } from './components/ApiKeyModal';
 import { MutationModal } from './components/MutationModal';
 import type { TableSchema, QueryResult, DatabaseMetadata } from './types/database';
-import { Table, BarChart2, CheckCircle2, AlertCircle, Info, Sparkles } from 'lucide-react';
+import {
+  Database, Download, Key, RotateCcw, Upload, Layers,
+  Table as TableIcon, BarChart2,
+} from 'lucide-react';
 
 export const App: React.FC = () => {
-  // Database state
   const [metadata, setMetadata] = useState<DatabaseMetadata>(sqliteService.getMetadata());
   const [tables, setTables] = useState<TableSchema[]>([]);
   const [selectedTable, setSelectedTable] = useState<string | null>(null);
   const [canRollback, setCanRollback] = useState(false);
-
-  // Active View Tab: 'table' vs 'chart'
   const [activeTab, setActiveTab] = useState<'table' | 'chart'>('table');
-
-  // Query & AI State
   const [currentSql, setCurrentSql] = useState('');
   const [explanation, setExplanation] = useState('');
   const [isMutation, setIsMutation] = useState(false);
   const [suggestedChartType, setSuggestedChartType] = useState<'bar' | 'line' | 'pie' | 'none'>('none');
   const [queryResult, setQueryResult] = useState<QueryResult | null>(null);
-
-  // Loading States
   const [isAiLoading, setIsAiLoading] = useState(false);
   const [isExecuting, setIsExecuting] = useState(false);
-
-  // Modals
-  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
-  const [isApiKeyModalOpen, setIsApiKeyModalOpen] = useState(false);
+  const [showDrawer, setShowDrawer] = useState(false);
+  const [isUploadOpen, setIsUploadOpen] = useState(false);
+  const [isApiKeyOpen, setIsApiKeyOpen] = useState(false);
   const [hasApiKey, setHasApiKey] = useState(geminiService.hasApiKey());
   const [pendingMutation, setPendingMutation] = useState<{ sql: string; explanation: string } | null>(null);
+  const [toast, setToast] = useState<{ msg: string; type: string } | null>(null);
 
-  // Toast notification
-  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
-
-  const showToast = (message: string, type: 'success' | 'error' | 'info' = 'info') => {
-    setToast({ message, type });
-    setTimeout(() => setToast(null), 4000);
+  const showToast = (msg: string, type = 'info') => {
+    setToast({ msg, type });
+    setTimeout(() => setToast(null), 2500);
   };
 
-  // Refresh database schema & metadata
-  const refreshDatabaseState = useCallback(async () => {
-    try {
-      const schemas = await sqliteService.getSchema();
-      setTables(schemas);
-      setMetadata(sqliteService.getMetadata());
-      setCanRollback(sqliteService.canRollback());
-
-      if (schemas.length > 0 && !selectedTable) {
-        setSelectedTable(schemas[0].name);
-      }
-    } catch (err) {
-      console.error('Failed to refresh database state:', err);
-    }
+  const refreshDb = useCallback(async () => {
+    const schemas = await sqliteService.getSchema();
+    setTables(schemas);
+    setMetadata(sqliteService.getMetadata());
+    setCanRollback(sqliteService.canRollback());
+    if (schemas.length > 0 && !selectedTable) setSelectedTable(schemas[0].name);
   }, [selectedTable]);
 
-  // Initialize with sample database on load
   useEffect(() => {
-    const initApp = async () => {
-      try {
-        await sqliteService.loadSample('ecommerce');
-        const schemas = await sqliteService.getSchema();
-        setTables(schemas);
-        setMetadata(sqliteService.getMetadata());
-        setCanRollback(sqliteService.canRollback());
-
-        if (schemas.length > 0) {
-          setSelectedTable('products');
-          // Run initial preview
-          const initialSql = `SELECT id, title, category, price, stock_qty, rating FROM products ORDER BY id ASC LIMIT 15;`;
-          setCurrentSql(initialSql);
-          setExplanation('Loaded sample products catalog to get started.');
-          const res = await sqliteService.executeQuery(initialSql);
-          setQueryResult(res);
-        }
-      } catch (err: any) {
-        showToast('Error initializing database engine: ' + err.message, 'error');
+    (async () => {
+      await sqliteService.loadSample('ecommerce');
+      await refreshDb();
+      const schemas = await sqliteService.getSchema();
+      if (schemas.length > 0) {
+        setSelectedTable('products');
+        const sql = 'SELECT * FROM products LIMIT 20;';
+        setCurrentSql(sql);
+        setExplanation('All products');
+        setQueryResult(await sqliteService.executeQuery(sql));
       }
-    };
-
-    initApp();
+    })();
   }, []);
 
-  // Execute an arbitrary SQL query
-  const handleExecuteSql = async (sql: string, queryExplanation?: string) => {
+  const executeSql = async (sql: string, expl?: string) => {
     if (!sql.trim()) return;
     setIsExecuting(true);
-
     try {
       const res = await sqliteService.executeQuery(sql);
       setQueryResult(res);
       setCurrentSql(sql);
-      if (queryExplanation) setExplanation(queryExplanation);
-
-      // If mutation, refresh tables and counts
-      if (res.isMutation) {
-        await refreshDatabaseState();
-        showToast(`Statement applied: ${res.affectedRows ?? 1} row(s) affected`, 'success');
-      }
-
-      // Check if chart is recommended
-      if (res.suggestedChartType && res.suggestedChartType !== 'none') {
-        setActiveTab('chart');
-      }
-    } catch (err: any) {
-      showToast(err?.message || 'SQL execution failed', 'error');
-    } finally {
-      setIsExecuting(false);
-    }
+      if (expl) setExplanation(expl);
+      if (res.isMutation) { await refreshDb(); showToast(`${res.affectedRows ?? 1} row(s) affected`, 'success'); }
+    } catch (err: any) { showToast(err?.message, 'error'); }
+    finally { setIsExecuting(false); }
   };
 
-  // Handle Natural Language Prompt submission
-  const handleGenerateFromPrompt = async (prompt: string) => {
+  const handlePrompt = async (prompt: string) => {
     setIsAiLoading(true);
-
     try {
-      const schemaContext = await sqliteService.getSchemaPromptContext();
-      const aiResponse = await geminiService.generateSql(prompt, schemaContext);
-
-      setCurrentSql(aiResponse.sql);
-      setExplanation(aiResponse.explanation);
-      setIsMutation(aiResponse.isMutation);
-      setSuggestedChartType(aiResponse.suggestedChartType || 'none');
-
-      if (aiResponse.isMutation) {
-        // Intercept with confirmation modal for safety
-        setPendingMutation({
-          sql: aiResponse.sql,
-          explanation: aiResponse.explanation,
-        });
-      } else {
-        // Execute SELECT query immediately
-        await handleExecuteSql(aiResponse.sql, aiResponse.explanation);
-
-        if (aiResponse.suggestedChartType && aiResponse.suggestedChartType !== 'none') {
-          setActiveTab('chart');
-        } else {
-          setActiveTab('table');
-        }
+      const ctx = await sqliteService.getSchemaPromptContext();
+      const ai = await geminiService.generateSql(prompt, ctx);
+      setCurrentSql(ai.sql); setExplanation(ai.explanation);
+      setIsMutation(ai.isMutation); setSuggestedChartType(ai.suggestedChartType || 'none');
+      if (ai.isMutation) { setPendingMutation({ sql: ai.sql, explanation: ai.explanation }); }
+      else {
+        await executeSql(ai.sql, ai.explanation);
+        setActiveTab(ai.suggestedChartType && ai.suggestedChartType !== 'none' ? 'chart' : 'table');
       }
-    } catch (err: any) {
-      showToast(err?.message || 'Failed to generate query with Gemini', 'error');
-    } finally {
-      setIsAiLoading(false);
-    }
+    } catch (err: any) { showToast(err?.message, 'error'); }
+    finally { setIsAiLoading(false); }
   };
 
-  // Auto-Fix query with Gemini if it failed
   const handleAutoFix = async (failedSql: string, errorMsg: string) => {
     setIsAiLoading(true);
     try {
-      const schemaContext = await sqliteService.getSchemaPromptContext();
-      const fixed = await geminiService.fixSqlError(failedSql, errorMsg, schemaContext);
-
-      setCurrentSql(fixed.sql);
-      setExplanation(`Auto-fixed by Gemini: ${fixed.explanation}`);
-      setIsMutation(fixed.isMutation);
-      showToast('Query auto-fixed by Gemini!', 'success');
-
-      await handleExecuteSql(fixed.sql, fixed.explanation);
-    } catch (err: any) {
-      showToast(err?.message || 'Could not auto-fix query', 'error');
-    } finally {
-      setIsAiLoading(false);
-    }
+      const ctx = await sqliteService.getSchemaPromptContext();
+      const fixed = await geminiService.fixSqlError(failedSql, errorMsg, ctx);
+      setCurrentSql(fixed.sql); setExplanation(fixed.explanation); setIsMutation(fixed.isMutation);
+      await executeSql(fixed.sql, fixed.explanation);
+    } catch (err: any) { showToast(err?.message, 'error'); }
+    finally { setIsAiLoading(false); }
   };
 
-  // Preview table when clicked in sidebar
-  const handlePreviewTable = async (tableName: string) => {
-    setSelectedTable(tableName);
-    const sql = `SELECT * FROM "${tableName}" LIMIT 50;`;
-    const exp = `Previewing up to 50 records from "${tableName}".`;
-    setCurrentSql(sql);
-    setExplanation(exp);
-    setIsMutation(false);
-    setSuggestedChartType('none');
-    setActiveTab('table');
-    await handleExecuteSql(sql, exp);
+  const previewTable = async (name: string) => {
+    setSelectedTable(name);
+    setShowDrawer(false);
+    const sql = `SELECT * FROM "${name}" LIMIT 50;`;
+    setCurrentSql(sql); setExplanation(name); setIsMutation(false);
+    setSuggestedChartType('none'); setActiveTab('table');
+    await executeSql(sql, name);
   };
 
-  // Inline cell update in DataGrid
-  const handleCellUpdate = async (pkCol: string, pkVal: any, targetCol: string, newVal: any): Promise<boolean> => {
+  const handleCellUpdate = async (pkCol: string, pkVal: any, col: string, val: any): Promise<boolean> => {
     if (!selectedTable) return false;
-    const success = await sqliteService.updateCell(selectedTable, pkCol, pkVal, targetCol, newVal);
-    if (success) {
-      await refreshDatabaseState();
-      showToast(`Updated "${targetCol}" to "${newVal}"`, 'success');
-      return true;
-    } else {
-      showToast('Failed to update cell', 'error');
-      return false;
-    }
+    const ok = await sqliteService.updateCell(selectedTable, pkCol, pkVal, col, val);
+    if (ok) { await refreshDb(); showToast('Updated', 'success'); }
+    return ok;
   };
 
-  // Rollback last mutation
-  const handleRollback = async () => {
-    const success = sqliteService.rollbackSnapshot();
-    if (success) {
-      await refreshDatabaseState();
-      showToast('Reverted database to previous snapshot', 'info');
-      if (selectedTable) {
-        handlePreviewTable(selectedTable);
-      }
-    } else {
-      showToast('No snapshots available to revert', 'error');
-    }
+  const handleDownload = () => {
+    const binary = sqliteService.exportBinary();
+    const blob = new Blob([binary.buffer as ArrayBuffer], { type: 'application/x-sqlite3' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url;
+    a.download = metadata.name.endsWith('.sqlite') || metadata.name.endsWith('.db') ? metadata.name : `${metadata.name}.sqlite`;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+    showToast('Downloaded', 'success');
   };
 
-  // Download the modified database binary
-  const handleDownloadDatabase = () => {
-    try {
-      const binary = sqliteService.exportBinary();
-      const blob = new Blob([binary.buffer as ArrayBuffer], { type: 'application/x-sqlite3' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      const fileName = metadata.name.endsWith('.sqlite') || metadata.name.endsWith('.db')
-        ? metadata.name
-        : `${metadata.name}.sqlite`;
-      link.download = fileName;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-      showToast(`Downloaded ${fileName}`, 'success');
-    } catch (err: any) {
-      showToast('Export failed: ' + err?.message, 'error');
-    }
-  };
-
-  // Load sample dataset
-  const handleLoadSample = async (sampleId: 'ecommerce' | 'saas') => {
-    try {
-      await sqliteService.loadSample(sampleId);
-      await refreshDatabaseState();
-      const schemas = await sqliteService.getSchema();
-      if (schemas.length > 0) {
-        handlePreviewTable(schemas[0].name);
-      }
-      showToast(`Loaded ${sampleId === 'ecommerce' ? 'E-Commerce Store' : 'SaaS Metrics'} database`, 'success');
-    } catch (err: any) {
-      showToast('Failed to load sample: ' + err?.message, 'error');
-    }
+  const handleLoadSample = async (id: 'ecommerce' | 'saas') => {
+    await sqliteService.loadSample(id); await refreshDb();
+    const s = await sqliteService.getSchema();
+    if (s.length > 0) previewTable(s[0].name);
   };
 
   return (
-    <div className="app-container">
-      {/* Top Navbar */}
-      <Navbar
-        metadata={metadata}
-        hasApiKey={hasApiKey}
-        canRollback={canRollback}
-        onOpenApiKeyModal={() => setIsApiKeyModalOpen(true)}
-        onOpenUploadModal={() => setIsUploadModalOpen(true)}
-        onDownloadDb={handleDownloadDatabase}
-        onRollback={handleRollback}
-        onLoadSample={handleLoadSample}
-      />
+    <div className="app-shell">
+      {/* ─── TOP BAR ─── */}
+      <header className="topbar">
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          {/* Schema toggle */}
+          <button onClick={() => setShowDrawer(!showDrawer)} className="btn btn-ghost btn-sm" title="Tables">
+            <Layers size={15} />
+          </button>
 
-      {/* Main Workspace Body */}
-      <div className="app-body">
-        {/* Left Sidebar Schema Browser */}
-        <Sidebar
-          tables={tables}
-          selectedTable={selectedTable}
-          onSelectTable={(name) => {
-            setSelectedTable(name);
-            handlePreviewTable(name);
-          }}
-          onPreviewTable={handlePreviewTable}
-          onRefreshSchema={refreshDatabaseState}
-          onOpenUpload={() => setIsUploadModalOpen(true)}
-        />
-
-        {/* Center Main Workspace */}
-        <main className="main-content">
-          {/* Top AI Prompt Bar */}
-          <PromptBar
-            onGenerate={handleGenerateFromPrompt}
-            isLoading={isAiLoading}
-            activeTableName={selectedTable}
-          />
-
-          {/* Generated SQL & Explanation Inspector */}
-          {currentSql && (
-            <QueryInspector
-              currentSql={currentSql}
-              explanation={explanation}
-              isMutation={isMutation}
-              result={queryResult}
-              isRunning={isExecuting}
-              onExecute={handleExecuteSql}
-              onAutoFix={handleAutoFix}
-            />
-          )}
-
-          {/* Results View Switcher (Table vs Chart) */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '4px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <button
-                onClick={() => setActiveTab('table')}
-                className={`btn btn-sm ${activeTab === 'table' ? 'btn-primary' : 'btn-secondary'}`}
-                style={{ gap: '6px', fontSize: '0.8rem' }}
-              >
-                <Table size={13} />
-                <span>Data Grid</span>
-                {queryResult && (
-                  <span className="badge badge-indigo" style={{ padding: '0 5px' }}>
-                    {queryResult.rowCount}
-                  </span>
-                )}
-              </button>
-
-              <button
-                onClick={() => setActiveTab('chart')}
-                className={`btn btn-sm ${activeTab === 'chart' ? 'btn-primary' : 'btn-secondary'}`}
-                style={{ gap: '6px', fontSize: '0.8rem' }}
-              >
-                <BarChart2 size={13} />
-                <span>Visualizer</span>
-                {suggestedChartType && suggestedChartType !== 'none' && (
-                  <span className="badge badge-cyan" style={{ padding: '0 5px', fontSize: '0.65rem' }}>
-                    <Sparkles size={9} /> Auto-detected
-                  </span>
-                )}
-              </button>
-            </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <Database size={14} color="var(--accent)" />
+            <span style={{ fontFamily: 'Outfit', fontWeight: 700, fontSize: '0.95rem' }}>BolDB</span>
           </div>
 
-          {/* Results Panel */}
-          {activeTab === 'table' ? (
-            <DataGrid
-              result={queryResult}
-              activeTable={selectedTable}
-              onCellUpdate={handleCellUpdate}
-            />
-          ) : (
-            <Visualizer
-              result={queryResult}
-              suggestedType={suggestedChartType}
+          <div style={{ height: '16px', width: '1px', background: 'var(--border)' }} />
+
+          <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{metadata.name}</span>
+          {metadata.isDirty && <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: 'var(--amber)' }} />}
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+          <button onClick={() => handleLoadSample('ecommerce')} className="btn btn-ghost btn-xs">E-Commerce</button>
+          <button onClick={() => handleLoadSample('saas')} className="btn btn-ghost btn-xs">SaaS</button>
+
+          <div style={{ height: '16px', width: '1px', background: 'var(--border)', margin: '0 4px' }} />
+
+          {canRollback && (
+            <button onClick={async () => { sqliteService.rollbackSnapshot(); await refreshDb(); if (selectedTable) previewTable(selectedTable); showToast('Reverted'); }} className="btn btn-ghost btn-sm" title="Undo">
+              <RotateCcw size={13} />
+            </button>
+          )}
+          <button onClick={() => setIsUploadOpen(true)} className="btn btn-ghost btn-sm" title="Upload">
+            <Upload size={13} />
+          </button>
+          <button onClick={() => setIsApiKeyOpen(true)} className="btn btn-ghost btn-sm" style={{ gap: '4px' }} title="API Key">
+            <Key size={13} />
+            <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: hasApiKey ? 'var(--green)' : 'var(--amber)' }} />
+          </button>
+          <button onClick={handleDownload} className="btn btn-primary btn-sm" style={{ gap: '4px' }}>
+            <Download size={13} /> Export
+          </button>
+        </div>
+      </header>
+
+      {/* ─── SCHEMA DRAWER ─── */}
+      {showDrawer && (
+        <SchemaDrawer
+          tables={tables}
+          selectedTable={selectedTable}
+          onSelectTable={previewTable}
+          onClose={() => setShowDrawer(false)}
+          onRefresh={refreshDb}
+        />
+      )}
+
+      {/* ─── MAIN WORKSPACE ─── */}
+      <div className="workspace">
+        <div className="workspace-inner">
+          {/* Prompt */}
+          <PromptBar onGenerate={handlePrompt} isLoading={isAiLoading} />
+
+          {/* SQL Inspector */}
+          {currentSql && (
+            <QueryInspector
+              currentSql={currentSql} explanation={explanation} isMutation={isMutation}
+              result={queryResult} isRunning={isExecuting}
+              onExecute={executeSql} onAutoFix={handleAutoFix}
             />
           )}
-        </main>
+
+          {/* Tab bar */}
+          {queryResult && queryResult.columns.length > 0 && (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div className="pill-tabs">
+                <button className={`pill-tab ${activeTab === 'table' ? 'active' : ''}`} onClick={() => setActiveTab('table')}>
+                  <TableIcon size={12} /> Table
+                  <span style={{ fontSize: '0.65rem', opacity: 0.7 }}>{queryResult.rowCount}</span>
+                </button>
+                <button className={`pill-tab ${activeTab === 'chart' ? 'active' : ''}`} onClick={() => setActiveTab('chart')}>
+                  <BarChart2 size={12} /> Chart
+                </button>
+              </div>
+              {selectedTable && <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{selectedTable}</span>}
+            </div>
+          )}
+
+          {/* Results */}
+          {activeTab === 'table' ? (
+            <DataGrid result={queryResult} activeTable={selectedTable} onCellUpdate={handleCellUpdate} />
+          ) : (
+            <Visualizer result={queryResult} suggestedType={suggestedChartType} />
+          )}
+        </div>
       </div>
 
-      {/* Upload / Import Modal */}
-      <FileUploadModal
-        isOpen={isUploadModalOpen}
-        onClose={() => setIsUploadModalOpen(false)}
-        onUploadDatabase={async (buf, name) => {
-          await sqliteService.loadFromBuffer(buf, name);
-          await refreshDatabaseState();
-          const schemas = await sqliteService.getSchema();
-          if (schemas.length > 0) handlePreviewTable(schemas[0].name);
-          showToast(`Loaded database "${name}"`, 'success');
-        }}
-        onUploadCsv={async (fileName, csv) => {
-          const tableName = await sqliteService.importCsv(fileName, csv);
-          await refreshDatabaseState();
-          handlePreviewTable(tableName);
-          showToast(`Imported CSV into table "${tableName}"`, 'success');
-        }}
+      {/* ─── MODALS ─── */}
+      <FileUploadModal isOpen={isUploadOpen} onClose={() => setIsUploadOpen(false)}
+        onUploadDatabase={async (buf, name) => { await sqliteService.loadFromBuffer(buf, name); await refreshDb(); const s = await sqliteService.getSchema(); if (s.length > 0) previewTable(s[0].name); }}
+        onUploadCsv={async (name, csv) => { const t = await sqliteService.importCsv(name, csv); await refreshDb(); previewTable(t); }}
         onLoadSample={handleLoadSample}
-        onCreateEmpty={async () => {
-          await sqliteService.createEmpty();
-          await refreshDatabaseState();
-          showToast('Created empty SQLite database', 'info');
-        }}
+        onCreateEmpty={async () => { await sqliteService.createEmpty(); await refreshDb(); }}
       />
-
-      {/* Gemini API Key Configuration Modal */}
-      <ApiKeyModal
-        isOpen={isApiKeyModalOpen}
-        onClose={() => setIsApiKeyModalOpen(false)}
-        onKeySaved={() => {
-          setHasApiKey(geminiService.hasApiKey());
-          showToast('Gemini API settings updated', 'success');
-        }}
-      />
-
-      {/* Mutation Safety Confirmation Modal */}
+      <ApiKeyModal isOpen={isApiKeyOpen} onClose={() => setIsApiKeyOpen(false)} onKeySaved={() => setHasApiKey(geminiService.hasApiKey())} />
       {pendingMutation && (
-        <MutationModal
-          isOpen={Boolean(pendingMutation)}
-          sql={pendingMutation.sql}
-          explanation={pendingMutation.explanation}
-          onConfirm={async () => {
-            const sqlToRun = pendingMutation.sql;
-            const exp = pendingMutation.explanation;
-            setPendingMutation(null);
-            await handleExecuteSql(sqlToRun, exp);
-          }}
+        <MutationModal isOpen sql={pendingMutation.sql} explanation={pendingMutation.explanation}
+          onConfirm={async () => { const s = pendingMutation.sql; const e = pendingMutation.explanation; setPendingMutation(null); await executeSql(s, e); }}
           onCancel={() => setPendingMutation(null)}
         />
       )}
 
-      {/* Toast Notification Banner */}
+      {/* Toast */}
       {toast && (
-        <div
-          style={{
-            position: 'fixed',
-            bottom: '24px',
-            right: '24px',
-            padding: '12px 18px',
-            borderRadius: 'var(--radius-md)',
-            background:
-              toast.type === 'success'
-                ? 'rgba(16, 185, 129, 0.95)'
-                : toast.type === 'error'
-                ? 'rgba(244, 63, 94, 0.95)'
-                : 'rgba(99, 102, 241, 0.95)',
-            color: '#ffffff',
-            boxShadow: 'var(--shadow-lg)',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '10px',
-            zIndex: 9999,
-            fontSize: '0.85rem',
-            fontWeight: 500,
-            backdropFilter: 'blur(8px)',
-            animation: 'slideUp 0.2s ease',
-          }}
-        >
-          {toast.type === 'success' && <CheckCircle2 size={16} />}
-          {toast.type === 'error' && <AlertCircle size={16} />}
-          {toast.type === 'info' && <Info size={16} />}
-          <span>{toast.message}</span>
+        <div className="animate-slide-up" style={{
+          position: 'fixed', bottom: '20px', left: '50%', transform: 'translateX(-50%)',
+          padding: '8px 18px', borderRadius: 'var(--radius-full)',
+          background: toast.type === 'error' ? 'var(--red-bg)' : toast.type === 'success' ? 'var(--green-bg)' : 'var(--bg-elevated)',
+          border: `1px solid ${toast.type === 'error' ? 'rgba(248,113,113,0.2)' : toast.type === 'success' ? 'rgba(52,211,153,0.2)' : 'var(--border)'}`,
+          color: toast.type === 'error' ? 'var(--red)' : toast.type === 'success' ? 'var(--green)' : 'var(--text-secondary)',
+          fontSize: '0.78rem', zIndex: 999,
+        }}>
+          {toast.msg}
         </div>
       )}
     </div>

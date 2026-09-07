@@ -1,168 +1,69 @@
 import React, { useState } from 'react';
-import { Sparkles, CornerDownLeft, Loader2, Lightbulb } from 'lucide-react';
+import { Sparkles, CornerDownLeft, Loader2 } from 'lucide-react';
 
 interface PromptBarProps {
   onGenerate: (prompt: string) => Promise<void>;
   isLoading: boolean;
-  activeTableName?: string | null;
 }
 
-export const PromptBar: React.FC<PromptBarProps> = ({
-  onGenerate,
-  isLoading,
-  activeTableName,
-}) => {
+const suggestions = [
+  'Top 5 customers by spend',
+  'Revenue by category',
+  'Orders this month',
+  'Low stock items',
+];
+
+export const PromptBar: React.FC<PromptBarProps> = ({ onGenerate, isLoading }) => {
   const [prompt, setPrompt] = useState('');
 
-  const suggestions = [
-    'Show top 5 customers with highest total spend',
-    'Count products by category and average price',
-    'Show all orders grouped by status',
-    'Find items with low stock (under 30 units)',
-    'Increase prices by 10% for Electronics category',
-  ];
-
-  const handleSubmit = (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
-    if (!prompt.trim() || isLoading) return;
-    onGenerate(prompt.trim());
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSubmit();
-    }
-  };
-
-  const handleChipClick = (suggestion: string) => {
-    setPrompt(suggestion);
-    onGenerate(suggestion);
-  };
+  const submit = () => { if (prompt.trim() && !isLoading) onGenerate(prompt.trim()); };
 
   return (
-    <div className="glass-panel" style={{ padding: '18px 22px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
-      {/* Header and Voice Prompt Title */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <div 
-            style={{ 
-              width: '26px', 
-              height: '26px', 
-              borderRadius: '7px', 
-              background: 'rgba(99, 102, 241, 0.2)', 
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'center' 
-            }}
-          >
-            <Sparkles size={14} color="var(--indigo-500)" />
-          </div>
-          <span style={{ fontSize: '0.95rem', fontWeight: 600 }}>
-            Bol AI Studio <span style={{ color: 'var(--text-dim)', fontWeight: 400, fontSize: '0.8rem' }}>(Natural Language to SQL)</span>
-          </span>
-        </div>
-
-        {activeTableName && (
-          <span className="badge badge-cyan" style={{ fontSize: '0.72rem' }}>
-            Focused on: {activeTableName}
-          </span>
-        )}
-      </div>
-
-      {/* Input Box Form */}
-      <form onSubmit={handleSubmit} style={{ position: 'relative' }}>
-        <textarea
-          rows={2}
-          value={prompt}
+    <div className="animate-slide-up" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+      {/* Input */}
+      <div style={{
+        display: 'flex', alignItems: 'center', gap: '10px',
+        background: 'var(--bg-surface)', border: '1px solid var(--border)',
+        borderRadius: 'var(--radius-lg)', padding: '5px 5px 5px 16px',
+        transition: 'border-color 0.15s, box-shadow 0.15s',
+      }}
+        onFocus={(e) => { e.currentTarget.style.borderColor = 'var(--border-focus)'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(139,92,246,0.06)'; }}
+        onBlur={(e) => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.boxShadow = 'none'; }}
+      >
+        <Sparkles size={15} color="var(--accent)" style={{ flexShrink: 0 }} />
+        <input
+          type="text" value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder="Ask anything in plain English... e.g. 'Show top 5 customers with orders over $100' or 'Update status to Delivered for order #104'"
+          onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); submit(); } }}
+          placeholder="Ask anything about your data..."
           style={{
-            width: '100%',
-            background: 'var(--bg-surface-elevated)',
-            border: '1px solid var(--border-medium)',
-            borderRadius: 'var(--radius-lg)',
-            padding: '14px 100px 14px 16px',
-            color: 'var(--text-main)',
-            fontSize: '0.95rem',
-            resize: 'none',
-            outline: 'none',
-            boxShadow: 'inset 0 2px 4px rgba(0, 0, 0, 0.3)',
-            transition: 'border-color 0.2s, box-shadow 0.2s',
-          }}
-          onFocus={(e) => {
-            e.target.style.borderColor = 'var(--indigo-500)';
-            e.target.style.boxShadow = '0 0 0 3px rgba(99, 102, 241, 0.25), inset 0 2px 4px rgba(0, 0, 0, 0.3)';
-          }}
-          onBlur={(e) => {
-            e.target.style.borderColor = 'var(--border-medium)';
-            e.target.style.boxShadow = 'inset 0 2px 4px rgba(0, 0, 0, 0.3)';
+            flex: 1, background: 'transparent', border: 'none', outline: 'none',
+            color: 'var(--text)', fontSize: '0.88rem', padding: '8px 0',
           }}
         />
+        <button onClick={submit} disabled={!prompt.trim() || isLoading}
+          className="btn btn-primary btn-sm"
+          style={{ borderRadius: 'var(--radius-md)', padding: '8px 14px' }}
+        >
+          {isLoading ? <Loader2 size={14} className="animate-spin" /> : <CornerDownLeft size={14} />}
+        </button>
+      </div>
 
-        {/* Action Button inside textarea */}
-        <div style={{ position: 'absolute', right: '12px', bottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <button
-            type="submit"
-            onClick={(e) => {
-              e.preventDefault();
-              handleSubmit();
-            }}
-            disabled={!prompt.trim() || isLoading}
-            className="btn btn-primary btn-sm"
+      {/* Suggestion chips */}
+      <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+        {suggestions.map((s, i) => (
+          <button key={i} onClick={() => { setPrompt(s); onGenerate(s); }}
             style={{
-              padding: '8px 14px',
-              borderRadius: 'var(--radius-md)',
-              opacity: !prompt.trim() || isLoading ? 0.6 : 1,
-              cursor: !prompt.trim() || isLoading ? 'not-allowed' : 'pointer',
+              padding: '4px 11px', fontSize: '0.7rem', fontFamily: 'inherit',
+              background: 'var(--accent-bg)', color: 'var(--accent-light)',
+              border: '1px solid rgba(139,92,246,0.12)', borderRadius: 'var(--radius-full)',
+              cursor: 'pointer', outline: 'none',
+              transition: 'all 0.12s',
             }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--accent-bg-hover)'; e.currentTarget.style.borderColor = 'rgba(139,92,246,0.25)'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--accent-bg)'; e.currentTarget.style.borderColor = 'rgba(139,92,246,0.12)'; }}
           >
-            {isLoading ? (
-              <>
-                <Loader2 size={14} className="animate-spin" />
-                <span>Thinking...</span>
-              </>
-            ) : (
-              <>
-                <span>Generate</span>
-                <CornerDownLeft size={13} />
-              </>
-            )}
-          </button>
-        </div>
-      </form>
-
-      {/* Suggested Quick Prompts */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--text-dim)', fontSize: '0.75rem', marginRight: '4px' }}>
-          <Lightbulb size={13} color="var(--amber-400)" />
-          <span>Suggestions:</span>
-        </div>
-        {suggestions.map((item, idx) => (
-          <button
-            key={idx}
-            onClick={() => handleChipClick(item)}
-            className="badge badge-indigo"
-            style={{
-              cursor: 'pointer',
-              fontSize: '0.72rem',
-              padding: '3px 9px',
-              border: '1px solid rgba(99, 102, 241, 0.25)',
-              background: 'rgba(99, 102, 241, 0.08)',
-              color: 'var(--text-muted)',
-              transition: 'all 0.15s ease',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.color = 'var(--text-main)';
-              e.currentTarget.style.borderColor = 'var(--indigo-500)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.color = 'var(--text-muted)';
-              e.currentTarget.style.borderColor = 'rgba(99, 102, 241, 0.25)';
-            }}
-          >
-            {item}
+            {s}
           </button>
         ))}
       </div>

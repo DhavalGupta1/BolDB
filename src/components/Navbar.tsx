@@ -1,5 +1,5 @@
 import React from 'react';
-import { Database, Download, Key, RotateCcw, Sparkles, FileSpreadsheet, HardDrive } from 'lucide-react';
+import { Database, Download, Key, RotateCcw, HardDrive } from 'lucide-react';
 import type { DatabaseMetadata } from '../types/database';
 
 interface NavbarProps {
@@ -23,148 +23,89 @@ export const Navbar: React.FC<NavbarProps> = ({
   onRollback,
   onLoadSample,
 }) => {
-  const formatBytes = (bytes: number): string => {
-    if (bytes === 0) return '0 B';
-    const k = 1024;
-    const sizes = ['B', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return `${parseFloat((bytes / Math.pow(k, i)).toFixed(1))} ${sizes[i]}`;
-  };
-
   return (
-    <header className="glass-nav" style={{ padding: '12px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', zIndex: 50 }}>
-      {/* Brand Logo */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-        <div 
-          style={{ 
-            width: '38px', 
-            height: '38px', 
-            borderRadius: '10px', 
-            background: 'var(--grad-primary)', 
-            display: 'flex', 
-            alignItems: 'center', 
+    <header
+      style={{
+        height: '52px',
+        padding: '0 20px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        borderBottom: '1px solid var(--border-subtle)',
+        background: 'var(--bg-surface)',
+        zIndex: 50,
+        flexShrink: 0,
+      }}
+    >
+      {/* Brand */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <div
+          style={{
+            width: '30px',
+            height: '30px',
+            borderRadius: '8px',
+            background: '#fff',
+            display: 'flex',
+            alignItems: 'center',
             justifyContent: 'center',
-            boxShadow: '0 0 20px rgba(99, 102, 241, 0.4)'
           }}
         >
-          <Database size={22} color="#ffffff" />
+          <Database size={16} color="#000" />
         </div>
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span className="brand-font" style={{ fontSize: '1.25rem', fontWeight: 800, letterSpacing: '-0.03em' }}>
-              Bol<span className="text-gradient">DB</span>
-            </span>
-            <span className="badge badge-indigo">
-              <Sparkles size={11} /> AI Engine
-            </span>
-          </div>
-          <p style={{ fontSize: '0.72rem', color: 'var(--text-dim)', marginTop: '-2px' }}>
-            Speak to your Database
-          </p>
-        </div>
+        <span className="brand-font" style={{ fontSize: '1.05rem', fontWeight: 800 }}>
+          BolDB
+        </span>
       </div>
 
-      {/* Active Database Info */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-        <button 
+      {/* Center — Active DB */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <button
           onClick={onOpenUploadModal}
-          className="btn btn-secondary btn-sm"
-          title="Open Database or Import CSV"
-          style={{ gap: '6px' }}
+          className="btn btn-ghost btn-sm"
+          style={{ gap: '5px', color: 'var(--text-muted)' }}
         >
-          <HardDrive size={14} color="var(--cyan-400)" />
-          <span style={{ maxWidth: '160px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontWeight: 600 }}>
+          <HardDrive size={13} />
+          <span style={{ maxWidth: '140px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
             {metadata.name}
           </span>
           {metadata.isDirty && (
-            <span 
-              style={{ 
-                width: '7px', 
-                height: '7px', 
-                borderRadius: '50%', 
-                backgroundColor: 'var(--amber-400)',
-                boxShadow: '0 0 8px var(--amber-400)' 
-              }} 
-              title="Unsaved changes in active session"
-            />
+            <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: 'var(--amber)' }} />
           )}
         </button>
 
-        <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>
-          {metadata.tableCount} {metadata.tableCount === 1 ? 'table' : 'tables'} • {formatBytes(metadata.sizeBytes)}
-        </span>
+        <span style={{ color: 'var(--text-dim)', fontSize: '0.7rem' }}>•</span>
 
-        {/* Quick Sample Selector */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginLeft: '6px' }}>
-          <button 
-            onClick={() => onLoadSample('ecommerce')}
-            className="btn btn-ghost btn-sm"
-            style={{ fontSize: '0.75rem', padding: '4px 8px' }}
-          >
-            🛒 E-Commerce
-          </button>
-          <button 
-            onClick={() => onLoadSample('saas')}
-            className="btn btn-ghost btn-sm"
-            style={{ fontSize: '0.75rem', padding: '4px 8px' }}
-          >
-            ⚡ SaaS
-          </button>
-        </div>
+        <button onClick={() => onLoadSample('ecommerce')} className="btn btn-ghost btn-sm" style={{ fontSize: '0.72rem', padding: '3px 7px' }}>
+          E-Commerce
+        </button>
+        <button onClick={() => onLoadSample('saas')} className="btn btn-ghost btn-sm" style={{ fontSize: '0.72rem', padding: '3px 7px' }}>
+          SaaS
+        </button>
       </div>
 
       {/* Right Actions */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-        {/* Rollback button if mutation history exists */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
         {canRollback && (
-          <button 
-            onClick={onRollback}
-            className="btn btn-secondary btn-sm"
-            title="Rollback last mutation"
-            style={{ gap: '5px', borderColor: 'var(--amber-400)', color: 'var(--amber-400)' }}
-          >
+          <button onClick={onRollback} className="btn btn-ghost btn-sm" title="Undo last change">
             <RotateCcw size={13} />
-            <span>Undo Mutation</span>
           </button>
         )}
 
-        {/* Upload / Import */}
-        <button 
-          onClick={onOpenUploadModal}
-          className="btn btn-secondary btn-sm"
-          style={{ gap: '6px' }}
-        >
-          <FileSpreadsheet size={14} />
-          <span>Upload / CSV</span>
-        </button>
-
-        {/* Gemini API Key */}
-        <button 
-          onClick={onOpenApiKeyModal}
-          className={`btn btn-sm ${hasApiKey ? 'btn-secondary' : 'btn-accent'}`}
-          style={{ gap: '6px' }}
-        >
+        <button onClick={onOpenApiKeyModal} className="btn btn-ghost btn-sm" style={{ gap: '5px' }}>
           <Key size={13} />
-          <span>{hasApiKey ? 'Gemini Key' : 'Connect Key'}</span>
-          <span 
-            style={{ 
-              width: '6px', 
-              height: '6px', 
-              borderRadius: '50%', 
-              backgroundColor: hasApiKey ? 'var(--emerald-400)' : 'var(--amber-400)' 
-            }} 
+          <span
+            style={{
+              width: '5px',
+              height: '5px',
+              borderRadius: '50%',
+              background: hasApiKey ? 'var(--green)' : 'var(--amber)',
+            }}
           />
         </button>
 
-        {/* Download DB */}
-        <button 
-          onClick={onDownloadDb}
-          className="btn btn-primary btn-sm"
-          style={{ gap: '6px', fontWeight: 600 }}
-          title="Download the updated SQLite database"
-        >
-          <Download size={14} />
-          <span>Download DB</span>
+        <button onClick={onDownloadDb} className="btn btn-primary btn-sm" style={{ gap: '5px' }}>
+          <Download size={13} />
+          <span>Export</span>
         </button>
       </div>
     </header>
