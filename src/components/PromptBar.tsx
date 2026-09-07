@@ -105,6 +105,10 @@ export const PromptBar: React.FC<PromptBarProps> = ({
         <div style={{ position: 'absolute', right: '12px', bottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
           <button
             type="submit"
+            onClick={(e) => {
+              e.preventDefault();
+              handleSubmit();
+            }}
             disabled={!prompt.trim() || isLoading}
             className="btn btn-primary btn-sm"
             style={{

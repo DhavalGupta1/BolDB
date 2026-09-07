@@ -21,34 +21,19 @@ export const DataGrid: React.FC<DataGridProps> = ({
   // Cell editing state
   const [editingCell, setEditingCell] = useState<{ rowIdx: number; colIdx: number; val: any } | null>(null);
 
-  if (!result || result.columns.length === 0) {
-    return (
-      <div className="glass-panel" style={{ padding: '60px 20px', textAlign: 'center', color: 'var(--text-dim)' }}>
-        <FileSpreadsheet size={36} color="var(--text-dim)" style={{ margin: '0 auto 12px', opacity: 0.4 }} />
-        <h4 style={{ fontSize: '1.05rem', color: 'var(--text-muted)', marginBottom: '4px' }}>
-          No query results to display yet
-        </h4>
-        <p style={{ fontSize: '0.85rem' }}>
-          Type a request in natural language above or select a table from the sidebar to inspect data.
-        </p>
-      </div>
-    );
-  }
-
-  // Detect Primary Key column if activeTable is set (usually 'id')
-  const pkColIndex = result.columns.findIndex((c) => c.toLowerCase() === 'id' || c.toLowerCase().endsWith('_id'));
-
   // Filter rows by search term
   const filteredRows = useMemo(() => {
+    if (!result || !result.values) return [];
     if (!searchTerm.trim()) return result.values;
     const term = searchTerm.toLowerCase();
     return result.values.filter((row) =>
       row.some((val) => String(val ?? '').toLowerCase().includes(term))
     );
-  }, [result.values, searchTerm]);
+  }, [result, searchTerm]);
 
   // Sort rows
   const sortedRows = useMemo(() => {
+    if (!result || !result.columns) return [];
     if (!sortCol) return filteredRows;
     const colIdx = result.columns.indexOf(sortCol);
     if (colIdx === -1) return filteredRows;
@@ -69,7 +54,7 @@ export const DataGrid: React.FC<DataGridProps> = ({
         ? String(valA).localeCompare(String(valB))
         : String(valB).localeCompare(String(valA));
     });
-  }, [filteredRows, sortCol, sortAsc, result.columns]);
+  }, [result, filteredRows, sortCol, sortAsc]);
 
   // Pagination slice
   const totalPages = Math.max(1, Math.ceil(sortedRows.length / pageSize));
@@ -77,6 +62,23 @@ export const DataGrid: React.FC<DataGridProps> = ({
     const start = (currentPage - 1) * pageSize;
     return sortedRows.slice(start, start + pageSize);
   }, [sortedRows, currentPage, pageSize]);
+
+  if (!result || result.columns.length === 0) {
+    return (
+      <div className="glass-panel" style={{ padding: '60px 20px', textAlign: 'center', color: 'var(--text-dim)' }}>
+        <FileSpreadsheet size={36} color="var(--text-dim)" style={{ margin: '0 auto 12px', opacity: 0.4 }} />
+        <h4 style={{ fontSize: '1.05rem', color: 'var(--text-muted)', marginBottom: '4px' }}>
+          No query results to display yet
+        </h4>
+        <p style={{ fontSize: '0.85rem' }}>
+          Type a request in natural language above or select a table from the sidebar to inspect data.
+        </p>
+      </div>
+    );
+  }
+
+  // Detect Primary Key column if activeTable is set (usually 'id')
+  const pkColIndex = result.columns.findIndex((c) => c.toLowerCase() === 'id' || c.toLowerCase().endsWith('_id'));
 
   const handleSort = (colName: string) => {
     if (sortCol === colName) {

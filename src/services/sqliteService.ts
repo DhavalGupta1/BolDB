@@ -1,4 +1,5 @@
 import initSqlJs, { type Database, type SqlJsStatic } from 'sql.js';
+import sqlWasmUrl from 'sql.js/dist/sql-wasm.wasm?url';
 import Papa from 'papaparse';
 import type { TableSchema, ColumnInfo, QueryResult, DatabaseMetadata } from '../types/database';
 
@@ -18,7 +19,7 @@ class SqliteService {
   async init(): Promise<void> {
     if (this.SQL) return;
     this.SQL = await initSqlJs({
-      locateFile: (file) => `/${file}`,
+      locateFile: () => sqlWasmUrl,
     });
   }
 
