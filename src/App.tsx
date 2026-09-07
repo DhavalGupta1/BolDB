@@ -129,6 +129,20 @@ export const App: React.FC = () => {
     showToast('Downloaded', 'success');
   };
 
+  const handleUploadFile = async (file: File) => {
+    try {
+      const result = await sqliteService.importAnyFile(file);
+      await refreshDb();
+      if (result.tables && result.tables.length > 0) {
+        previewTable(result.tables[0]);
+      }
+      showToast(result.message, 'success');
+    } catch (err: any) {
+      showToast(err?.message || 'Failed to import file', 'error');
+      throw err;
+    }
+  };
+
   const handleLoadSample = async (id: 'ecommerce' | 'saas') => {
     await sqliteService.loadSample(id); await refreshDb();
     const s = await sqliteService.getSchema();
@@ -167,10 +181,15 @@ export const App: React.FC = () => {
               <RotateCcw size={13} />
             </button>
           )}
-          <button onClick={() => setIsUploadOpen(true)} className="btn btn-ghost btn-sm" title="Upload">
+          <button onClick={() => setIsUploadOpen(true)} className="btn btn-ghost btn-sm" title="Import Data (.xlsx, .xlsm, .json, .csv, .sql, .db)">
             <Upload size={13} />
           </button>
-          <button onClick={() => setIsApiKeyOpen(true)} className="btn btn-ghost btn-sm" style={{ gap: '4px' }} title="API Key">
+          <button
+            onClick={() => setIsApiKeyOpen(true)}
+            className="btn btn-ghost btn-sm"
+            style={{ gap: '4px' }}
+            title={hasApiKey ? 'Gemini AI: Connected (Built-in)' : 'Gemini AI: Key Required'}
+          >
             <Key size={13} />
             <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: hasApiKey ? 'var(--green)' : 'var(--amber)' }} />
           </button>
@@ -232,11 +251,19 @@ export const App: React.FC = () => {
       </div>
 
       {/* ─── MODALS ─── */}
-      <FileUploadModal isOpen={isUploadOpen} onClose={() => setIsUploadOpen(false)}
-        onUploadDatabase={async (buf, name) => { await sqliteService.loadFromBuffer(buf, name); await refreshDb(); const s = await sqliteService.getSchema(); if (s.length > 0) previewTable(s[0].name); }}
-        onUploadCsv={async (name, csv) => { const t = await sqliteService.importCsv(name, csv); await refreshDb(); previewTable(t); }}
+      <FileUploadModal
+        isOpen={isUploadOpen}
+        onClose={() => setIsUploadOpen(false)}
+        onUploadFile={handleUploadFile}
         onLoadSample={handleLoadSample}
-        onCreateEmpty={async () => { await sqliteService.createEmpty(); await refreshDb(); }}
+        onCreateEmpty={async () => {
+          await sqliteService.createEmpty();
+          await refreshDb();
+          setQueryResult(null);
+          setSelectedTable(null);
+          setCurrentSql('');
+          showToast('Created empty database', 'info');
+        }}
       />
       <ApiKeyModal isOpen={isApiKeyOpen} onClose={() => setIsApiKeyOpen(false)} onKeySaved={() => setHasApiKey(geminiService.hasApiKey())} />
       {pendingMutation && (

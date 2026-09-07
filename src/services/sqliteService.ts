@@ -1,6 +1,7 @@
 import initSqlJs, { type Database, type SqlJsStatic } from 'sql.js';
 import sqlWasmUrl from 'sql.js/dist/sql-wasm.wasm?url';
 import Papa from 'papaparse';
+import * as XLSX from 'xlsx';
 import type { TableSchema, ColumnInfo, QueryResult, DatabaseMetadata } from '../types/database';
 
 class SqliteService {
@@ -265,7 +266,113 @@ class SqliteService {
     return this.db.export();
   }
 
-  // Ingest CSV and turn into SQLite table
+  // Sanitize identifier for SQLite table/column
+  private sanitizeName(raw: string, fallback = 'imported_table'): string {
+    const clean = raw
+      .trim()
+      .replace(/\.[^/.]+$/, '')
+      .replace(/[^a-zA-Z0-9_]/g, '_')
+      .replace(/^_+|_+$/g, '')
+      .toLowerCase();
+    return clean || fallback;
+  }
+
+  // Generic ingestion of an array of objects into a SQLite table
+  async importRecords(rawTableName: string, rows: Record<string, any>[]): Promise<string> {
+    await this.init();
+    if (!this.db) {
+      await this.createEmpty();
+    }
+
+    if (!rows || rows.length === 0) {
+      throw new Error('No records to import');
+    }
+
+    const tableName = this.sanitizeName(rawTableName, 'imported_data');
+
+    // Collect all unique fields across rows (inspect first 250 rows)
+    const fieldSet = new Set<string>();
+    const scanLimit = Math.min(rows.length, 250);
+    for (let i = 0; i < scanLimit; i++) {
+      const row = rows[i];
+      if (row && typeof row === 'object') {
+        Object.keys(row).forEach((k) => {
+          if (k.trim()) fieldSet.add(k.trim());
+        });
+      }
+    }
+
+    const fields = Array.from(fieldSet);
+    if (fields.length === 0) {
+      throw new Error('No valid column headers found in data');
+    }
+
+    // Infer column types
+    const sampleRows = rows.slice(0, 100);
+    const colDefinitions = fields.map((field) => {
+      let isInteger = true;
+      let isReal = true;
+      let hasNonNull = false;
+
+      for (const row of sampleRows) {
+        const val = row[field];
+        if (val !== null && val !== undefined && val !== '') {
+          hasNonNull = true;
+          if (typeof val === 'number') {
+            if (!Number.isInteger(val)) isInteger = false;
+          } else if (typeof val === 'boolean') {
+            // Booleans are stored as integers (0/1)
+          } else {
+            isInteger = false;
+            isReal = false;
+            break;
+          }
+        }
+      }
+
+      const colType = hasNonNull ? (isInteger ? 'INTEGER' : isReal ? 'REAL' : 'TEXT') : 'TEXT';
+      return `"${field.replace(/"/g, '""')}" ${colType}`;
+    });
+
+    this.createSnapshot();
+
+    // Recreate table
+    this.db!.run(`DROP TABLE IF EXISTS "${tableName}";`);
+    this.db!.run(`CREATE TABLE "${tableName}" (id INTEGER PRIMARY KEY AUTOINCREMENT, ${colDefinitions.join(', ')});`);
+
+    // Batch insert
+    const escapedCols = fields.map((f) => `"${f.replace(/"/g, '""')}"`).join(', ');
+    const placeholders = fields.map(() => '?').join(', ');
+    const insertSql = `INSERT INTO "${tableName}" (${escapedCols}) VALUES (${placeholders});`;
+
+    const stmt = this.db!.prepare(insertSql);
+    for (const row of rows) {
+      const values = fields.map((f) => {
+        let val = row[f];
+        if (val === undefined || val === null || val === '') return null;
+        if (typeof val === 'boolean') return val ? 1 : 0;
+        if (typeof val === 'object') {
+          try {
+            return JSON.stringify(val);
+          } catch {
+            return String(val);
+          }
+        }
+        return val;
+      });
+      stmt.run(values);
+    }
+    stmt.free();
+
+    this.dbMetadata.isDirty = true;
+    if (this.dbMetadata.name === 'NewDatabase.sqlite' || this.dbMetadata.name === 'Untitled.sqlite') {
+      this.dbMetadata.name = `${tableName}.sqlite`;
+    }
+
+    return tableName;
+  }
+
+  // Ingest CSV, TSV, or delimited text
   async importCsv(fileName: string, csvContent: string): Promise<string> {
     await this.init();
     if (!this.db) {
@@ -277,63 +384,13 @@ class SqliteService {
         header: true,
         dynamicTyping: true,
         skipEmptyLines: true,
-        complete: (results) => {
+        delimitersToGuess: [',', '\t', '|', ';'],
+        complete: async (results) => {
           try {
             if (!results.data || results.data.length === 0) {
-              return reject(new Error('CSV file contains no records'));
+              return reject(new Error('Delimited file contains no records'));
             }
-
-            const rawTableName = fileName.replace(/\.[^/.]+$/, '').replace(/[^a-zA-Z0-9_]/g, '_').toLowerCase();
-            const tableName = rawTableName || 'imported_data';
-            const fields = results.meta.fields || [];
-
-            if (fields.length === 0) {
-              return reject(new Error('No column headers found in CSV'));
-            }
-
-            // Infer column types from first 50 rows
-            const sampleRows = results.data.slice(0, 50) as Record<string, any>[];
-            const colDefinitions = fields.map((field) => {
-              let isInteger = true;
-              let isReal = true;
-
-              for (const row of sampleRows) {
-                const val = row[field];
-                if (val !== null && val !== undefined && val !== '') {
-                  if (typeof val === 'number') {
-                    if (!Number.isInteger(val)) isInteger = false;
-                  } else {
-                    isInteger = false;
-                    isReal = false;
-                    break;
-                  }
-                }
-              }
-
-              const colType = isInteger ? 'INTEGER' : isReal ? 'REAL' : 'TEXT';
-              return `"${field}" ${colType}`;
-            });
-
-            this.createSnapshot();
-
-            // Create table
-            this.db!.run(`DROP TABLE IF EXISTS "${tableName}";`);
-            this.db!.run(`CREATE TABLE "${tableName}" (id INTEGER PRIMARY KEY AUTOINCREMENT, ${colDefinitions.join(', ')});`);
-
-            // Batch insert
-            const placeholders = fields.map(() => '?').join(', ');
-            const insertSql = `INSERT INTO "${tableName}" (${fields.map((f) => `"${f}"`).join(', ')}) VALUES (${placeholders});`;
-
-            const stmt = this.db!.prepare(insertSql);
-            for (const row of results.data as Record<string, any>[]) {
-              const values = fields.map((f) => (row[f] === undefined ? null : row[f]));
-              stmt.run(values);
-            }
-            stmt.free();
-
-            this.dbMetadata.isDirty = true;
-            this.dbMetadata.name = this.dbMetadata.name === 'NewDatabase.sqlite' ? `${tableName}.sqlite` : this.dbMetadata.name;
-
+            const tableName = await this.importRecords(fileName, results.data as Record<string, any>[]);
             resolve(tableName);
           } catch (err: any) {
             reject(err);
@@ -342,6 +399,195 @@ class SqliteService {
         error: (err: any) => reject(err),
       });
     });
+  }
+
+  // Ingest Excel files (.xlsx, .xlsm, .xls, .xlsb)
+  async importExcel(fileName: string, buffer: ArrayBuffer): Promise<string[]> {
+    await this.init();
+    if (!this.db) await this.createEmpty();
+
+    const workbook = XLSX.read(buffer, { type: 'array', cellDates: true });
+    if (!workbook.SheetNames || workbook.SheetNames.length === 0) {
+      throw new Error('Excel workbook contains no sheets');
+    }
+
+    const baseFileName = this.sanitizeName(fileName);
+    const createdTables: string[] = [];
+
+    for (const sheetName of workbook.SheetNames) {
+      const worksheet = workbook.Sheets[sheetName];
+      if (!worksheet) continue;
+
+      const rows = XLSX.utils.sheet_to_json<Record<string, any>>(worksheet, { defval: null });
+      if (!rows || rows.length === 0) continue;
+
+      const rawTargetName = (workbook.SheetNames.length === 1 && sheetName.toLowerCase().startsWith('sheet'))
+        ? baseFileName
+        : `${baseFileName}_${this.sanitizeName(sheetName)}`;
+
+      const tableName = await this.importRecords(rawTargetName, rows);
+      createdTables.push(tableName);
+    }
+
+    if (createdTables.length === 0) {
+      throw new Error('No tabular data could be read from the Excel sheets');
+    }
+
+    return createdTables;
+  }
+
+  // Ingest JSON or NDJSON / JSON Lines
+  async importJson(fileName: string, jsonContent: string): Promise<string[]> {
+    await this.init();
+    if (!this.db) await this.createEmpty();
+
+    const trimmed = jsonContent.trim();
+    if (!trimmed) throw new Error('JSON file is empty');
+
+    const baseName = this.sanitizeName(fileName);
+    const createdTables: string[] = [];
+
+    // Attempt 1: Standard JSON parse
+    let parsed: any = null;
+    let isNdjson = false;
+
+    try {
+      parsed = JSON.parse(trimmed);
+    } catch {
+      isNdjson = true;
+    }
+
+    if (isNdjson) {
+      // Attempt 2: Line-delimited JSON (NDJSON)
+      const lines = trimmed.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+      const ndRows: Record<string, any>[] = [];
+      for (const line of lines) {
+        try {
+          const item = JSON.parse(line);
+          if (typeof item === 'object' && item !== null) ndRows.push(item);
+        } catch {
+          // ignore non-json line
+        }
+      }
+
+      if (ndRows.length > 0) {
+        const t = await this.importRecords(baseName, ndRows);
+        return [t];
+      }
+      throw new Error('Invalid JSON or NDJSON syntax');
+    }
+
+    // Array of objects
+    if (Array.isArray(parsed)) {
+      if (parsed.length === 0) throw new Error('JSON array contains no rows');
+      const t = await this.importRecords(baseName, parsed);
+      return [t];
+    }
+
+    // Object containing tables or data key
+    if (typeof parsed === 'object' && parsed !== null) {
+      const arrayKeys = Object.keys(parsed).filter((k) => Array.isArray(parsed[k]) && parsed[k].length > 0);
+
+      if (arrayKeys.length > 0) {
+        for (const key of arrayKeys) {
+          const arrayData = parsed[key];
+          const tableName = (arrayKeys.length === 1 && ['data', 'records', 'items', 'rows', 'result'].includes(key.toLowerCase()))
+            ? baseName
+            : `${baseName}_${this.sanitizeName(key)}`;
+          const t = await this.importRecords(tableName, arrayData);
+          createdTables.push(t);
+        }
+        return createdTables;
+      }
+
+      // Single object (1 row)
+      const t = await this.importRecords(baseName, [parsed]);
+      return [t];
+    }
+
+    throw new Error('JSON file must contain an array of records or object with collections');
+  }
+
+  // Ingest SQL script (.sql)
+  async importSql(_fileName: string, sqlContent: string): Promise<string[]> {
+    await this.init();
+    if (!this.db) await this.createEmpty();
+
+    const prevSchema = await this.getSchema();
+    const prevNames = new Set(prevSchema.map((s) => s.name));
+
+    this.createSnapshot();
+    try {
+      this.db!.exec(sqlContent);
+    } catch (err: any) {
+      this.rollbackSnapshot();
+      throw new Error(`SQL Script execution failed: ${err?.message || err}`);
+    }
+
+    this.dbMetadata.isDirty = true;
+    const newSchema = await this.getSchema();
+    const currentNames = newSchema.map((s) => s.name);
+    const added = currentNames.filter((n) => !prevNames.has(n));
+
+    return added.length > 0 ? added : currentNames;
+  }
+
+  // Unified file importer handling all formats
+  async importAnyFile(file: File): Promise<{ tables: string[]; message: string }> {
+    const name = file.name.toLowerCase();
+
+    // SQLite Binary (.db, .sqlite, .sqlite3)
+    if (name.endsWith('.db') || name.endsWith('.sqlite') || name.endsWith('.sqlite3')) {
+      const buffer = await file.arrayBuffer();
+      await this.loadFromBuffer(buffer, file.name);
+      const schema = await this.getSchema();
+      return {
+        tables: schema.map((s) => s.name),
+        message: `Loaded SQLite database "${file.name}" (${schema.length} tables)`,
+      };
+    }
+
+    // Excel spreadsheets (.xlsx, .xlsm, .xls, .xlsb)
+    if (name.endsWith('.xlsx') || name.endsWith('.xlsm') || name.endsWith('.xls') || name.endsWith('.xlsb')) {
+      const buffer = await file.arrayBuffer();
+      const tables = await this.importExcel(file.name, buffer);
+      return {
+        tables,
+        message: `Imported ${tables.length} table(s) from Excel "${file.name}": ${tables.join(', ')}`,
+      };
+    }
+
+    // JSON and NDJSON (.json, .jsonl, .ndjson)
+    if (name.endsWith('.json') || name.endsWith('.jsonl') || name.endsWith('.ndjson')) {
+      const text = await file.text();
+      const tables = await this.importJson(file.name, text);
+      return {
+        tables,
+        message: `Imported ${tables.length} table(s) from JSON "${file.name}": ${tables.join(', ')}`,
+      };
+    }
+
+    // SQL Scripts (.sql)
+    if (name.endsWith('.sql')) {
+      const text = await file.text();
+      const tables = await this.importSql(file.name, text);
+      return {
+        tables,
+        message: `Executed SQL script "${file.name}". Active tables: ${tables.join(', ')}`,
+      };
+    }
+
+    // Delimited text (.csv, .tsv, .txt)
+    if (name.endsWith('.csv') || name.endsWith('.tsv') || name.endsWith('.txt')) {
+      const text = await file.text();
+      const table = await this.importCsv(file.name, text);
+      return {
+        tables: [table],
+        message: `Imported table "${table}" from "${file.name}"`,
+      };
+    }
+
+    throw new Error(`Unsupported file type: "${file.name}". Supported: .xlsx, .xlsm, .xls, .json, .csv, .tsv, .sql, .sqlite, .db`);
   }
 
   // Load pre-made sample databases
