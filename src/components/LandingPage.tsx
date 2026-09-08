@@ -62,8 +62,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   return (
     <div style={{
       minHeight: '100vh',
-      background: '#07080c',
-      color: '#f8fafc',
+      background: '#ffffff',
+      color: '#09090b',
       overflowX: 'hidden',
       position: 'relative',
       fontFamily: "'Inter', sans-serif"
@@ -78,46 +78,45 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         position: 'sticky',
         top: 0,
         zIndex: 50,
-        background: 'rgba(7, 8, 12, 0.75)',
+        background: 'rgba(255, 255, 255, 0.9)',
         backdropFilter: 'blur(16px)',
-        borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
+        borderBottom: '1px solid #e4e4e7',
       }}>
         {/* Brand */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '32px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '9px', cursor: 'pointer' }} onClick={onLaunchStudio}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }} onClick={onLaunchStudio}>
             <div style={{
               width: '32px', height: '32px', borderRadius: 'var(--radius-sm)',
-              background: 'linear-gradient(135deg, var(--accent) 0%, #06b6d4 100%)',
+              background: '#09090b',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              boxShadow: '0 0 16px rgba(139, 92, 246, 0.3)'
             }}>
-              <Zap size={17} color="#ffffff" />
+              <Zap size={16} color="#ffffff" />
             </div>
-            <span className="font-heading" style={{ fontSize: '1.2rem', fontWeight: 800, color: '#ffffff', letterSpacing: '-0.03em' }}>
+            <span className="font-heading" style={{ fontSize: '1.2rem', fontWeight: 800, color: '#09090b', letterSpacing: '-0.03em' }}>
               BolDB
             </span>
           </div>
 
           {/* Links */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
-            <a href="#features" style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', textDecoration: 'none', transition: 'color 0.15s' }}
-               onMouseEnter={(e) => (e.currentTarget.style.color = '#fff')}
-               onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--text-secondary)')}>
+            <a href="#features" style={{ fontSize: '0.84rem', color: '#52525b', textDecoration: 'none', fontWeight: 500, transition: 'color 0.15s' }}
+               onMouseEnter={(e) => (e.currentTarget.style.color = '#000')}
+               onMouseLeave={(e) => (e.currentTarget.style.color = '#52525b')}>
               Features
             </a>
-            <a href="#demo" style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', textDecoration: 'none', transition: 'color 0.15s' }}
-               onMouseEnter={(e) => (e.currentTarget.style.color = '#fff')}
-               onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--text-secondary)')}>
+            <a href="#demo" style={{ fontSize: '0.84rem', color: '#52525b', textDecoration: 'none', fontWeight: 500, transition: 'color 0.15s' }}
+               onMouseEnter={(e) => (e.currentTarget.style.color = '#000')}
+               onMouseLeave={(e) => (e.currentTarget.style.color = '#52525b')}>
               Interactive Demo
             </a>
-            <a href="#architecture" style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', textDecoration: 'none', transition: 'color 0.15s' }}
-               onMouseEnter={(e) => (e.currentTarget.style.color = '#fff')}
-               onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--text-secondary)')}>
+            <a href="#architecture" style={{ fontSize: '0.84rem', color: '#52525b', textDecoration: 'none', fontWeight: 500, transition: 'color 0.15s' }}
+               onMouseEnter={(e) => (e.currentTarget.style.color = '#000')}
+               onMouseLeave={(e) => (e.currentTarget.style.color = '#52525b')}>
               Architecture
             </a>
-            <a href="#security" style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', textDecoration: 'none', transition: 'color 0.15s' }}
-               onMouseEnter={(e) => (e.currentTarget.style.color = '#fff')}
-               onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--text-secondary)')}>
+            <a href="#security" style={{ fontSize: '0.84rem', color: '#52525b', textDecoration: 'none', fontWeight: 500, transition: 'color 0.15s' }}
+               onMouseEnter={(e) => (e.currentTarget.style.color = '#000')}
+               onMouseLeave={(e) => (e.currentTarget.style.color = '#52525b')}>
               Privacy
             </a>
           </div>
@@ -137,7 +136,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               <button
                 onClick={onOpenSignIn}
                 className="btn btn-ghost"
-                style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', fontWeight: 500 }}
+                style={{ fontSize: '0.82rem', color: '#52525b', fontWeight: 500 }}
               >
                 Sign In
               </button>
@@ -169,11 +168,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         </div>
       </nav>
 
-      {/* ─── HERO SECTION (Matching Image 1 Optimus Layout) ─── */}
+      {/* ─── HERO SECTION ─── */}
       <section style={{
         maxWidth: '1380px',
         margin: '0 auto',
-        padding: '50px 40px 60px',
+        padding: '60px 40px 70px',
         display: 'grid',
         gridTemplateColumns: '1.1fr 0.9fr',
         gap: '40px',
@@ -184,8 +183,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         <div style={{ display: 'flex', flexDirection: 'column', gap: '22px' }}>
           {/* Subtitle tag */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)', letterSpacing: '0.04em', fontWeight: 500 }}>
-              — The AI database platform for modern teams
+            <span style={{ fontSize: '0.82rem', color: '#71717a', letterSpacing: '0.04em', fontWeight: 600, textTransform: 'uppercase' }}>
+              The Autonomous AI Database Studio
             </span>
           </div>
 
@@ -195,7 +194,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             lineHeight: 1.04,
             fontWeight: 800,
             letterSpacing: '-0.04em',
-            color: '#ffffff',
+            color: '#09090b',
             margin: 0
           }}>
             The platform <br />
@@ -205,7 +204,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           {/* Description */}
           <p style={{
             fontSize: '1.15rem',
-            color: '#94a3b8',
+            color: '#52525b',
             lineHeight: 1.6,
             maxWidth: '520px',
             margin: 0,
@@ -224,8 +223,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 borderRadius: 'var(--radius-full)',
                 padding: '13px 28px',
                 fontSize: '0.92rem',
-                fontWeight: 700,
-                boxShadow: '0 4px 25px rgba(139, 92, 246, 0.4)',
+                fontWeight: 600,
                 gap: '8px'
               }}
             >
@@ -251,15 +249,15 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           </div>
 
           {/* Feature Highlights Pills */}
-          <div style={{ display: 'flex', gap: '16px', marginTop: '16px', flexWrap: 'wrap' }}>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
-              <CheckCircle2 size={14} color="var(--green-light)" /> Zero server uploads
+          <div style={{ display: 'flex', gap: '18px', marginTop: '16px', flexWrap: 'wrap' }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.8rem', color: '#52525b' }}>
+              <CheckCircle2 size={15} color="#09090b" /> Zero server uploads
             </span>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
-              <CheckCircle2 size={14} color="var(--green-light)" /> Multi-format Excel, CSV, JSON
+            <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.8rem', color: '#52525b' }}>
+              <CheckCircle2 size={15} color="#09090b" /> Multi-format Excel, CSV, JSON
             </span>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.78rem', color: 'var(--green-light)' }}>
-              <CheckCircle2 size={14} color="var(--green-light)" /> Gemini 2.5 Flash built-in
+            <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.8rem', color: '#52525b' }}>
+              <CheckCircle2 size={15} color="#09090b" /> Gemini 2.5 Flash built-in
             </span>
           </div>
         </div>
@@ -275,29 +273,28 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         }}>
           <ParticleSphere />
           
-          {/* Subtle Floating Glass Metric Badge */}
+          {/* Floating Metric Badge */}
           <div style={{
             position: 'absolute',
             bottom: '40px',
             right: '20px',
-            background: 'rgba(14, 16, 23, 0.85)',
-            backdropFilter: 'blur(12px)',
-            border: '1px solid rgba(255, 255, 255, 0.1)',
+            background: '#ffffff',
+            border: '1px solid #e4e4e7',
             borderRadius: 'var(--radius-lg)',
             padding: '12px 18px',
-            boxShadow: '0 12px 32px rgba(0, 0, 0, 0.6)',
+            boxShadow: 'var(--shadow-md)',
             display: 'flex',
             alignItems: 'center',
             gap: '12px',
             animation: 'fadeIn 1s ease'
           }}>
             <div style={{
-              width: '10px', height: '10px', borderRadius: '50%',
-              background: 'var(--cyan-light)', boxShadow: '0 0 10px var(--cyan-glow)'
+              width: '8px', height: '8px', borderRadius: '50%',
+              background: '#16a34a'
             }} />
             <div>
-              <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Engine Status</div>
-              <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#fff' }}>SQLite WASM 0ms Latency</div>
+              <div style={{ fontSize: '0.72rem', color: '#71717a', fontWeight: 500 }}>Engine Status</div>
+              <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#09090b' }}>SQLite WASM 0ms Latency</div>
             </div>
           </div>
         </div>
@@ -305,10 +302,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
       {/* ─── METRICS & ARCHITECTURE STRIP ─── */}
       <section id="architecture" style={{
-        borderTop: '1px solid rgba(255, 255, 255, 0.06)',
-        borderBottom: '1px solid rgba(255, 255, 255, 0.06)',
-        background: 'rgba(10, 12, 18, 0.5)',
-        padding: '30px 40px',
+        borderTop: '1px solid #e4e4e7',
+        borderBottom: '1px solid #e4e4e7',
+        background: '#fafafa',
+        padding: '36px 40px',
       }}>
         <div style={{
           maxWidth: '1380px',
@@ -318,46 +315,46 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           gap: '24px',
         }}>
           <div>
-            <div style={{ fontSize: '2.4rem', fontWeight: 800, color: '#ffffff', letterSpacing: '-0.03em' }}>
+            <div style={{ fontSize: '2.4rem', fontWeight: 800, color: '#09090b', letterSpacing: '-0.03em' }}>
               99.4%
             </div>
-            <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', marginTop: '2px' }}>
+            <div style={{ fontSize: '0.8rem', color: '#71717a', marginTop: '2px' }}>
               Natural Language SQL accuracy with Gemini 2.5
             </div>
           </div>
 
           <div>
-            <div style={{ fontSize: '2.4rem', fontWeight: 800, color: 'var(--cyan-light)', letterSpacing: '-0.03em' }}>
+            <div style={{ fontSize: '2.4rem', fontWeight: 800, color: '#09090b', letterSpacing: '-0.03em' }}>
               300%
             </div>
-            <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', marginTop: '2px' }}>
+            <div style={{ fontSize: '0.8rem', color: '#71717a', marginTop: '2px' }}>
               Faster data analysis & reporting workflows
             </div>
           </div>
 
           <div>
-            <div style={{ fontSize: '2.4rem', fontWeight: 800, color: 'var(--accent-light)', letterSpacing: '-0.03em' }}>
+            <div style={{ fontSize: '2.4rem', fontWeight: 800, color: '#09090b', letterSpacing: '-0.03em' }}>
               0ms
             </div>
-            <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', marginTop: '2px' }}>
+            <div style={{ fontSize: '0.8rem', color: '#71717a', marginTop: '2px' }}>
               Local query latency via in-memory SQLite WASM
             </div>
           </div>
 
           <div>
-            <div style={{ fontSize: '2.4rem', fontWeight: 800, color: 'var(--green-light)', letterSpacing: '-0.03em' }}>
+            <div style={{ fontSize: '2.4rem', fontWeight: 800, color: '#09090b', letterSpacing: '-0.03em' }}>
               100%
             </div>
-            <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', marginTop: '2px' }}>
+            <div style={{ fontSize: '0.8rem', color: '#71717a', marginTop: '2px' }}>
               Client-side privacy. Data never leaves your device.
             </div>
           </div>
 
           <div>
-            <div style={{ fontSize: '2.4rem', fontWeight: 800, color: '#ffffff', letterSpacing: '-0.03em' }}>
+            <div style={{ fontSize: '2.4rem', fontWeight: 800, color: '#09090b', letterSpacing: '-0.03em' }}>
               5+
             </div>
-            <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', marginTop: '2px' }}>
+            <div style={{ fontSize: '0.8rem', color: '#71717a', marginTop: '2px' }}>
               Supported formats (Excel, CSV, JSON, SQL, DB)
             </div>
           </div>
@@ -374,27 +371,27 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           <span className="badge badge-purple" style={{ marginBottom: '12px', padding: '4px 12px', fontSize: '0.74rem' }}>
             Live Interactive Simulator
           </span>
-          <h2 style={{ fontSize: '2.8rem', fontWeight: 800, color: '#fff', letterSpacing: '-0.03em', margin: 0 }}>
+          <h2 style={{ fontSize: '2.6rem', fontWeight: 800, color: '#09090b', letterSpacing: '-0.03em', margin: 0 }}>
             Experience natural language database queries.
           </h2>
-          <p style={{ fontSize: '1rem', color: 'var(--text-secondary)', marginTop: '8px' }}>
+          <p style={{ fontSize: '1rem', color: '#52525b', marginTop: '8px' }}>
             Click an example query below to see how BolDB transforms conversational prompts into production SQL.
           </p>
         </div>
 
         {/* Demo Stage Container */}
         <div style={{
-          background: 'var(--bg-surface)',
-          border: '1px solid var(--border)',
+          background: '#ffffff',
+          border: '1px solid #e4e4e7',
           borderRadius: 'var(--radius-xl)',
-          boxShadow: '0 20px 60px rgba(0, 0, 0, 0.7)',
+          boxShadow: 'var(--shadow-md)',
           overflow: 'hidden',
         }}>
           {/* Query Selector Bar */}
           <div style={{
             padding: '16px 24px',
-            background: 'var(--bg-elevated)',
-            borderBottom: '1px solid var(--border)',
+            background: '#fafafa',
+            borderBottom: '1px solid #e4e4e7',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
@@ -402,8 +399,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             gap: '12px'
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Sparkles size={16} color="var(--accent-light)" />
-              <span style={{ fontSize: '0.85rem', fontWeight: 600, color: '#fff' }}>
+              <Sparkles size={16} color="#09090b" />
+              <span style={{ fontSize: '0.85rem', fontWeight: 600, color: '#09090b' }}>
                 Interactive Prompt:
               </span>
             </div>
@@ -417,13 +414,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                     padding: '6px 14px',
                     borderRadius: 'var(--radius-full)',
                     fontSize: '0.78rem',
-                    fontWeight: 600,
+                    fontWeight: 500,
                     fontFamily: 'inherit',
                     cursor: 'pointer',
                     transition: 'all 0.15s ease',
-                    border: activeDemoQuery === query ? '1px solid var(--accent)' : '1px solid var(--border)',
-                    background: activeDemoQuery === query ? 'var(--accent)' : 'var(--bg-card)',
-                    color: activeDemoQuery === query ? '#ffffff' : 'var(--text-secondary)',
+                    border: activeDemoQuery === query ? '1px solid #09090b' : '1px solid #e4e4e7',
+                    background: activeDemoQuery === query ? '#09090b' : '#ffffff',
+                    color: activeDemoQuery === query ? '#ffffff' : '#52525b',
                   }}
                 >
                   {query}
@@ -441,18 +438,22 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           </div>
 
           {/* Generated SQL HUD */}
-          <div style={{ padding: '16px 24px', background: 'rgba(0, 0, 0, 0.25)', borderBottom: '1px solid var(--border)' }}>
+          <div style={{ padding: '16px 24px', background: '#ffffff', borderBottom: '1px solid #e4e4e7' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-              <Terminal size={13} color="var(--cyan-light)" />
-              <span className="mono" style={{ fontSize: '0.72rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+              <Terminal size={13} color="#09090b" />
+              <span className="mono" style={{ fontSize: '0.72rem', color: '#71717a', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 600 }}>
                 AI Generated SQL Statement
               </span>
-              <span className="badge badge-green" style={{ fontSize: '0.62rem' }}>0.4ms Execution</span>
+              <span className="badge badge-green" style={{ fontSize: '0.65rem' }}>0.4ms Execution</span>
             </div>
             <pre className="mono" style={{
               margin: 0,
+              padding: '12px 16px',
+              background: '#f8fafc',
+              border: '1px solid #e4e4e7',
+              borderRadius: 'var(--radius-sm)',
               fontSize: '0.84rem',
-              color: '#38bdf8',
+              color: '#09090b',
               whiteSpace: 'pre-wrap',
               lineHeight: 1.5
             }}>
@@ -473,8 +474,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               <tbody>
                 {activeData.rows.map((row, idx) => (
                   <tr key={idx}>
-                    <td style={{ fontWeight: 600, color: '#ffffff' }}>{row.name}</td>
-                    <td style={{ color: 'var(--cyan-light)', fontWeight: 600 }}>{row.spent}</td>
+                    <td style={{ fontWeight: 600, color: '#09090b' }}>{row.name}</td>
+                    <td style={{ color: '#09090b', fontWeight: 600 }}>{row.spent}</td>
                     <td><span className="badge badge-purple">{row.orders} orders</span></td>
                   </tr>
                 ))}
@@ -491,10 +492,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         padding: '70px 40px 100px',
       }}>
         <div style={{ textAlign: 'center', marginBottom: '50px' }}>
-          <h2 style={{ fontSize: '2.6rem', fontWeight: 800, color: '#ffffff', letterSpacing: '-0.03em', margin: 0 }}>
+          <h2 style={{ fontSize: '2.6rem', fontWeight: 800, color: '#09090b', letterSpacing: '-0.03em', margin: 0 }}>
             Everything you need for autonomous data exploration.
           </h2>
-          <p style={{ fontSize: '1rem', color: 'var(--text-secondary)', marginTop: '8px' }}>
+          <p style={{ fontSize: '1rem', color: '#52525b', marginTop: '8px' }}>
             Engineered with modern architecture: WebAssembly, Google Gemini 2.5, and client-side privacy.
           </p>
         </div>
@@ -506,150 +507,156 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         }}>
           {/* Feature 1 */}
           <div style={{
-            background: 'var(--bg-surface)',
-            border: '1px solid var(--border)',
+            background: '#ffffff',
+            border: '1px solid #e4e4e7',
             borderRadius: 'var(--radius-lg)',
             padding: '28px',
             display: 'flex',
             flexDirection: 'column',
             gap: '14px',
+            boxShadow: 'var(--shadow-sm)',
           }}>
             <div style={{
               width: '40px', height: '40px', borderRadius: 'var(--radius-md)',
-              background: 'var(--accent-bg)', display: 'flex', alignItems: 'center',
-              justifyContent: 'center', border: '1px solid rgba(139, 92, 246, 0.3)'
+              background: '#f4f4f5', display: 'flex', alignItems: 'center',
+              justifyContent: 'center', border: '1px solid #e4e4e7'
             }}>
-              <Sparkles size={20} color="var(--accent-light)" />
+              <Sparkles size={18} color="#09090b" />
             </div>
-            <h3 style={{ fontSize: '1.2rem', fontWeight: 700, margin: 0, color: '#fff' }}>
+            <h3 style={{ fontSize: '1.2rem', fontWeight: 700, margin: 0, color: '#09090b' }}>
               Natural Language SQL
             </h3>
-            <p style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6, margin: 0 }}>
+            <p style={{ fontSize: '0.88rem', color: '#52525b', lineHeight: 1.6, margin: 0 }}>
               Convert human conversational prompts into optimized SQL statements with automated error recovery and safety guards.
             </p>
           </div>
 
           {/* Feature 2 */}
           <div style={{
-            background: 'var(--bg-surface)',
-            border: '1px solid var(--border)',
+            background: '#ffffff',
+            border: '1px solid #e4e4e7',
             borderRadius: 'var(--radius-lg)',
             padding: '28px',
             display: 'flex',
             flexDirection: 'column',
             gap: '14px',
+            boxShadow: 'var(--shadow-sm)',
           }}>
             <div style={{
               width: '40px', height: '40px', borderRadius: 'var(--radius-md)',
-              background: 'var(--cyan-bg)', display: 'flex', alignItems: 'center',
-              justifyContent: 'center', border: '1px solid rgba(6, 182, 212, 0.3)'
+              background: '#f4f4f5', display: 'flex', alignItems: 'center',
+              justifyContent: 'center', border: '1px solid #e4e4e7'
             }}>
-              <Cpu size={20} color="var(--cyan-light)" />
+              <Cpu size={18} color="#09090b" />
             </div>
-            <h3 style={{ fontSize: '1.2rem', fontWeight: 700, margin: 0, color: '#fff' }}>
+            <h3 style={{ fontSize: '1.2rem', fontWeight: 700, margin: 0, color: '#09090b' }}>
               In-Browser SQLite WASM
             </h3>
-            <p style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6, margin: 0 }}>
+            <p style={{ fontSize: '0.88rem', color: '#52525b', lineHeight: 1.6, margin: 0 }}>
               Zero backend database servers required. Queries execute locally in WebAssembly with sub-millisecond query latency.
             </p>
           </div>
 
           {/* Feature 3 */}
           <div style={{
-            background: 'var(--bg-surface)',
-            border: '1px solid var(--border)',
+            background: '#ffffff',
+            border: '1px solid #e4e4e7',
             borderRadius: 'var(--radius-lg)',
             padding: '28px',
             display: 'flex',
             flexDirection: 'column',
             gap: '14px',
+            boxShadow: 'var(--shadow-sm)',
           }}>
             <div style={{
               width: '40px', height: '40px', borderRadius: 'var(--radius-md)',
-              background: 'var(--green-bg)', display: 'flex', alignItems: 'center',
-              justifyContent: 'center', border: '1px solid rgba(16, 185, 129, 0.3)'
+              background: '#f4f4f5', display: 'flex', alignItems: 'center',
+              justifyContent: 'center', border: '1px solid #e4e4e7'
             }}>
-              <FileSpreadsheet size={20} color="var(--green-light)" />
+              <FileSpreadsheet size={18} color="#09090b" />
             </div>
-            <h3 style={{ fontSize: '1.2rem', fontWeight: 700, margin: 0, color: '#fff' }}>
+            <h3 style={{ fontSize: '1.2rem', fontWeight: 700, margin: 0, color: '#09090b' }}>
               Universal File Ingestion
             </h3>
-            <p style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6, margin: 0 }}>
+            <p style={{ fontSize: '0.88rem', color: '#52525b', lineHeight: 1.6, margin: 0 }}>
               Drag & drop Excel workbooks (.xlsx, .xlsm), JSON collections, CSV files, SQL dumps, or raw SQLite databases instantly.
             </p>
           </div>
 
           {/* Feature 4 */}
           <div style={{
-            background: 'var(--bg-surface)',
-            border: '1px solid var(--border)',
+            background: '#ffffff',
+            border: '1px solid #e4e4e7',
             borderRadius: 'var(--radius-lg)',
             padding: '28px',
             display: 'flex',
             flexDirection: 'column',
             gap: '14px',
+            boxShadow: 'var(--shadow-sm)',
           }}>
             <div style={{
               width: '40px', height: '40px', borderRadius: 'var(--radius-md)',
-              background: 'var(--pink-bg)', display: 'flex', alignItems: 'center',
-              justifyContent: 'center', border: '1px solid rgba(236, 72, 153, 0.3)'
+              background: '#f4f4f5', display: 'flex', alignItems: 'center',
+              justifyContent: 'center', border: '1px solid #e4e4e7'
             }}>
-              <BarChart3 size={20} color="var(--pink-light)" />
+              <BarChart3 size={18} color="#09090b" />
             </div>
-            <h3 style={{ fontSize: '1.2rem', fontWeight: 700, margin: 0, color: '#fff' }}>
+            <h3 style={{ fontSize: '1.2rem', fontWeight: 700, margin: 0, color: '#09090b' }}>
               Instant Visualizations
             </h3>
-            <p style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6, margin: 0 }}>
-              Automatic chart suggestion engine. Generates bar charts, trend lines, glowing area graphs, and donut distributions.
+            <p style={{ fontSize: '0.88rem', color: '#52525b', lineHeight: 1.6, margin: 0 }}>
+              Automatic chart suggestion engine. Generates bar charts, trend lines, area graphs, and distribution breakdowns.
             </p>
           </div>
 
           {/* Feature 5 (Privacy & Security) */}
           <div id="security" style={{
-            background: 'var(--bg-surface)',
-            border: '1px solid var(--border)',
+            background: '#ffffff',
+            border: '1px solid #e4e4e7',
             borderRadius: 'var(--radius-lg)',
             padding: '28px',
             display: 'flex',
             flexDirection: 'column',
             gap: '14px',
+            boxShadow: 'var(--shadow-sm)',
           }}>
             <div style={{
               width: '40px', height: '40px', borderRadius: 'var(--radius-md)',
-              background: 'var(--amber-bg)', display: 'flex', alignItems: 'center',
-              justifyContent: 'center', border: '1px solid rgba(245, 158, 11, 0.3)'
+              background: '#f4f4f5', display: 'flex', alignItems: 'center',
+              justifyContent: 'center', border: '1px solid #e4e4e7'
             }}>
-              <Lock size={20} color="var(--amber-light)" />
+              <Lock size={18} color="#09090b" />
             </div>
-            <h3 style={{ fontSize: '1.2rem', fontWeight: 700, margin: 0, color: '#fff' }}>
+            <h3 style={{ fontSize: '1.2rem', fontWeight: 700, margin: 0, color: '#09090b' }}>
               Client-Side Privacy
             </h3>
-            <p style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6, margin: 0 }}>
+            <p style={{ fontSize: '0.88rem', color: '#52525b', lineHeight: 1.6, margin: 0 }}>
               Your database records are stored only in your browser memory. Only sanitized schema headers are transmitted to the AI.
             </p>
           </div>
 
           {/* Feature 6 */}
           <div style={{
-            background: 'var(--bg-surface)',
-            border: '1px solid var(--border)',
+            background: '#ffffff',
+            border: '1px solid #e4e4e7',
             borderRadius: 'var(--radius-lg)',
             padding: '28px',
             display: 'flex',
             flexDirection: 'column',
             gap: '14px',
+            boxShadow: 'var(--shadow-sm)',
           }}>
             <div style={{
               width: '40px', height: '40px', borderRadius: 'var(--radius-md)',
-              background: 'rgba(99, 102, 241, 0.1)', display: 'flex', alignItems: 'center',
-              justifyContent: 'center', border: '1px solid rgba(99, 102, 241, 0.3)'
+              background: '#f4f4f5', display: 'flex', alignItems: 'center',
+              justifyContent: 'center', border: '1px solid #e4e4e7'
             }}>
-              <Layers size={20} color="#818cf8" />
+              <Layers size={18} color="#09090b" />
             </div>
-            <h3 style={{ fontSize: '1.2rem', fontWeight: 700, margin: 0, color: '#fff' }}>
+            <h3 style={{ fontSize: '1.2rem', fontWeight: 700, margin: 0, color: '#09090b' }}>
               Rollback & Cell Editing
             </h3>
-            <p style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: 1.6, margin: 0 }}>
+            <p style={{ fontSize: '0.88rem', color: '#52525b', lineHeight: 1.6, margin: 0 }}>
               Double-click any cell in the Data Grid to edit values live. Rollback snapshots let you undo any mutation with 1 click.
             </p>
           </div>
@@ -658,8 +665,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
       {/* ─── FOOTER ─── */}
       <footer style={{
-        borderTop: '1px solid rgba(255, 255, 255, 0.06)',
-        padding: '40px',
+        borderTop: '1px solid #e4e4e7',
+        padding: '36px 40px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
@@ -669,21 +676,21 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         gap: '20px'
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <Zap size={16} color="var(--accent-light)" />
-          <span style={{ fontSize: '0.9rem', fontWeight: 700, color: '#fff' }}>BolDB</span>
-          <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)', marginLeft: '10px' }}>
+          <Zap size={16} color="#09090b" />
+          <span style={{ fontSize: '0.9rem', fontWeight: 700, color: '#09090b' }}>BolDB</span>
+          <span style={{ fontSize: '0.78rem', color: '#71717a', marginLeft: '10px' }}>
             © 2026 BolDB Inc. All rights reserved.
           </span>
         </div>
 
-        <div style={{ display: 'flex', gap: '20px' }}>
-          <button onClick={onLaunchStudio} className="btn btn-ghost btn-xs" style={{ color: 'var(--text-secondary)' }}>
+        <div style={{ display: 'flex', gap: '16px' }}>
+          <button onClick={onLaunchStudio} className="btn btn-ghost btn-xs" style={{ color: '#52525b' }}>
             Launch Studio
           </button>
-          <button onClick={onOpenSignIn} className="btn btn-ghost btn-xs" style={{ color: 'var(--text-secondary)' }}>
+          <button onClick={onOpenSignIn} className="btn btn-ghost btn-xs" style={{ color: '#52525b' }}>
             Sign In
           </button>
-          <button onClick={onOpenSignUp} className="btn btn-ghost btn-xs" style={{ color: 'var(--text-secondary)' }}>
+          <button onClick={onOpenSignUp} className="btn btn-ghost btn-xs" style={{ color: '#52525b' }}>
             Sign Up
           </button>
         </div>

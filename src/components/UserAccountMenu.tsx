@@ -51,12 +51,12 @@ export const UserAccountMenu: React.FC<UserAccountMenuProps> = ({
     }
     if (provider === 'github') {
       return (
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="#09090b">
           <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
         </svg>
       );
     }
-    return <User size={12} color="var(--accent-light)" />;
+    return <User size={12} color="#09090b" />;
   };
 
   const getInitial = (name: string) => {
@@ -74,18 +74,18 @@ export const UserAccountMenu: React.FC<UserAccountMenuProps> = ({
           gap: '8px',
           padding: '5px 12px 5px 6px',
           borderRadius: 'var(--radius-full)',
-          background: 'var(--bg-elevated)',
-          border: isOpen ? '1px solid var(--accent)' : '1px solid var(--border)',
+          background: '#ffffff',
+          border: isOpen ? '1px solid #09090b' : '1px solid #e4e4e7',
           cursor: 'pointer',
           outline: 'none',
-          boxShadow: isOpen ? '0 0 15px rgba(139, 92, 246, 0.2)' : 'none',
+          boxShadow: 'var(--shadow-sm)',
           transition: 'all 0.15s ease',
         }}
         onMouseEnter={(e) => {
-          if (!isOpen) e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+          if (!isOpen) e.currentTarget.style.borderColor = '#09090b';
         }}
         onMouseLeave={(e) => {
-          if (!isOpen) e.currentTarget.style.borderColor = 'var(--border)';
+          if (!isOpen) e.currentTarget.style.borderColor = '#e4e4e7';
         }}
       >
         {/* Avatar Circle */}
@@ -94,7 +94,7 @@ export const UserAccountMenu: React.FC<UserAccountMenuProps> = ({
             width: '24px',
             height: '24px',
             borderRadius: '50%',
-            background: 'linear-gradient(135deg, var(--accent) 0%, #06b6d4 100%)',
+            background: '#09090b',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -107,7 +107,7 @@ export const UserAccountMenu: React.FC<UserAccountMenuProps> = ({
           {getInitial(user.name)}
         </div>
 
-        <span style={{ fontSize: '0.78rem', fontWeight: 600, color: '#ffffff', maxWidth: '140px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+        <span style={{ fontSize: '0.8rem', fontWeight: 600, color: '#09090b', maxWidth: '140px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {user.name}
         </span>
 
@@ -115,7 +115,7 @@ export const UserAccountMenu: React.FC<UserAccountMenuProps> = ({
           {getProviderIcon(user.provider)}
         </span>
 
-        <ChevronDown size={13} color="var(--text-dim)" style={{ transform: isOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
+        <ChevronDown size={13} color="#71717a" style={{ transform: isOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
       </button>
 
       {/* Dropdown Menu */}
@@ -127,24 +127,23 @@ export const UserAccountMenu: React.FC<UserAccountMenuProps> = ({
             top: 'calc(100% + 8px)',
             right: 0,
             width: '280px',
-            background: 'rgba(18, 20, 29, 0.96)',
-            border: '1px solid rgba(255, 255, 255, 0.12)',
+            background: '#ffffff',
+            border: '1px solid #e4e4e7',
             borderRadius: 'var(--radius-lg)',
-            boxShadow: '0 20px 50px rgba(0, 0, 0, 0.7), 0 0 30px rgba(139, 92, 246, 0.15)',
-            backdropFilter: 'blur(20px)',
+            boxShadow: 'var(--shadow-lg)',
             zIndex: 1000,
             overflow: 'hidden',
           }}
         >
           {/* Active Account Info */}
-          <div style={{ padding: '16px', borderBottom: '1px solid rgba(255, 255, 255, 0.08)' }}>
+          <div style={{ padding: '16px', borderBottom: '1px solid #e4e4e7' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
               <div
                 style={{
                   width: '36px',
                   height: '36px',
                   borderRadius: '50%',
-                  background: 'linear-gradient(135deg, var(--accent) 0%, #06b6d4 100%)',
+                  background: '#09090b',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -157,21 +156,21 @@ export const UserAccountMenu: React.FC<UserAccountMenuProps> = ({
               </div>
               <div style={{ overflow: 'hidden' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#ffffff', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
+                  <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#09090b', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
                     {user.name}
                   </span>
                   <span title={`Signed in via ${user.provider}`}>
                     {getProviderIcon(user.provider)}
                   </span>
                 </div>
-                <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
+                <div style={{ fontSize: '0.72rem', color: '#71717a', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
                   {user.email}
                 </div>
               </div>
             </div>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '2px 8px', borderRadius: 'var(--radius-full)', background: 'rgba(52, 211, 153, 0.12)', border: '1px solid rgba(52, 211, 153, 0.25)', color: 'var(--green)' }}>
-              <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: 'var(--green)' }} />
-              <span style={{ fontSize: '0.64rem', fontWeight: 600, textTransform: 'capitalize' }}>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '2px 8px', borderRadius: 'var(--radius-full)', background: '#f0fdf4', border: '1px solid #bbf7d0', color: '#166534' }}>
+              <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#16a34a' }} />
+              <span style={{ fontSize: '0.66rem', fontWeight: 600, textTransform: 'capitalize' }}>
                 Active Account ({user.provider})
               </span>
             </div>
@@ -179,8 +178,8 @@ export const UserAccountMenu: React.FC<UserAccountMenuProps> = ({
 
           {/* Switch Accounts Section */}
           {otherAccounts.length > 0 && (
-            <div style={{ padding: '8px 0', borderBottom: '1px solid rgba(255, 255, 255, 0.08)' }}>
-              <div style={{ padding: '4px 16px 6px', fontSize: '0.68rem', fontWeight: 600, color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            <div style={{ padding: '8px 0', borderBottom: '1px solid #e4e4e7' }}>
+              <div style={{ padding: '4px 16px 6px', fontSize: '0.68rem', fontWeight: 600, color: '#71717a', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                 Switch Account
               </div>
               {otherAccounts.map((account) => (
@@ -202,7 +201,7 @@ export const UserAccountMenu: React.FC<UserAccountMenuProps> = ({
                     cursor: 'pointer',
                     transition: 'background 0.12s',
                   }}
-                  onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)')}
+                  onMouseEnter={(e) => (e.currentTarget.style.background = '#f4f4f5')}
                   onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '9px', overflow: 'hidden' }}>
@@ -211,24 +210,24 @@ export const UserAccountMenu: React.FC<UserAccountMenuProps> = ({
                         width: '26px',
                         height: '26px',
                         borderRadius: '50%',
-                        background: 'var(--bg-elevated)',
-                        border: '1px solid var(--border)',
+                        background: '#f4f4f5',
+                        border: '1px solid #e4e4e7',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
                         fontSize: '0.72rem',
                         fontWeight: 600,
-                        color: 'var(--text-secondary)',
+                        color: '#09090b',
                         flexShrink: 0,
                       }}
                     >
                       {getInitial(account.name)}
                     </div>
                     <div style={{ overflow: 'hidden' }}>
-                      <div style={{ fontSize: '0.78rem', fontWeight: 600, color: '#ffffff', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
+                      <div style={{ fontSize: '0.78rem', fontWeight: 600, color: '#09090b', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
                         {account.name}
                       </div>
-                      <div style={{ fontSize: '0.68rem', color: 'var(--text-dim)', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
+                      <div style={{ fontSize: '0.68rem', color: '#71717a', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
                         {account.email}
                       </div>
                     </div>
@@ -257,19 +256,17 @@ export const UserAccountMenu: React.FC<UserAccountMenuProps> = ({
                 background: 'transparent',
                 border: 'none',
                 borderRadius: 'var(--radius-sm)',
-                color: 'var(--text-secondary)',
+                color: '#09090b',
                 fontSize: '0.78rem',
                 fontWeight: 500,
                 cursor: 'pointer',
                 transition: 'all 0.12s',
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.background = 'var(--accent-bg)';
-                e.currentTarget.style.color = 'var(--accent-light)';
+                e.currentTarget.style.background = '#f4f4f5';
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.background = 'transparent';
-                e.currentTarget.style.color = 'var(--text-secondary)';
               }}
             >
               <Plus size={14} />
@@ -290,14 +287,14 @@ export const UserAccountMenu: React.FC<UserAccountMenuProps> = ({
                 background: 'transparent',
                 border: 'none',
                 borderRadius: 'var(--radius-sm)',
-                color: 'var(--red)',
+                color: '#b91c1c',
                 fontSize: '0.78rem',
                 fontWeight: 500,
                 cursor: 'pointer',
                 transition: 'all 0.12s',
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.background = 'var(--red-bg)';
+                e.currentTarget.style.background = '#fef2f2';
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.background = 'transparent';

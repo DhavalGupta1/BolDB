@@ -14,14 +14,14 @@ export const SchemaView: React.FC<SchemaViewProps> = ({ tableSchema }) => {
       <div style={{
         padding: '60px 20px',
         textAlign: 'center',
-        background: 'var(--bg-surface)',
+        background: '#ffffff',
         borderRadius: 'var(--radius-lg)',
-        border: '1px solid var(--border)',
-        color: 'var(--text-muted)'
+        border: '1px solid #e4e4e7',
+        color: '#71717a'
       }}>
         <TableIcon size={32} style={{ margin: '0 auto 12px', opacity: 0.3 }} />
-        <p style={{ fontSize: '0.88rem', fontWeight: 600 }}>No Table Selected</p>
-        <p style={{ fontSize: '0.74rem', color: 'var(--text-dim)', marginTop: '4px' }}>
+        <p style={{ fontSize: '0.88rem', fontWeight: 600, color: '#09090b' }}>No Table Selected</p>
+        <p style={{ fontSize: '0.74rem', color: '#71717a', marginTop: '4px' }}>
           Select a table from the sidebar to inspect its schema and structure
         </p>
       </div>
@@ -40,29 +40,30 @@ export const SchemaView: React.FC<SchemaViewProps> = ({ tableSchema }) => {
     <div className="animate-slide-up" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
       {/* Table Header Info Card */}
       <div style={{
-        background: 'var(--bg-surface)',
-        border: '1px solid var(--border)',
+        background: '#ffffff',
+        border: '1px solid #e4e4e7',
         borderRadius: 'var(--radius-lg)',
         padding: '18px 20px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
         flexWrap: 'wrap',
-        gap: '12px'
+        gap: '12px',
+        boxShadow: 'var(--shadow-sm)'
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <div style={{
             width: '40px', height: '40px', borderRadius: 'var(--radius-md)',
-            background: 'var(--accent-bg)', display: 'flex', alignItems: 'center',
-            justifyContent: 'center', border: '1px solid rgba(139, 92, 246, 0.2)'
+            background: '#f4f4f5', display: 'flex', alignItems: 'center',
+            justifyContent: 'center', border: '1px solid #e4e4e7'
           }}>
-            <TableIcon size={20} color="var(--accent-light)" />
+            <TableIcon size={20} color="#09090b" />
           </div>
           <div>
-            <h3 style={{ fontSize: '1.1rem', fontWeight: 700, margin: 0, color: '#ffffff' }}>
+            <h3 style={{ fontSize: '1.1rem', fontWeight: 700, margin: 0, color: '#09090b' }}>
               {tableSchema.name}
             </h3>
-            <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', margin: 0 }}>
+            <p style={{ fontSize: '0.76rem', color: '#71717a', margin: 0 }}>
               {tableSchema.columns.length} columns • {tableSchema.rowCount.toLocaleString()} recorded rows
             </p>
           </div>
@@ -79,16 +80,16 @@ export const SchemaView: React.FC<SchemaViewProps> = ({ tableSchema }) => {
       <div className="data-table-container">
         <div style={{
           padding: '12px 16px',
-          background: 'var(--bg-elevated)',
-          borderBottom: '1px solid var(--border)',
+          background: '#fafafa',
+          borderBottom: '1px solid #e4e4e7',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between'
         }}>
-          <span style={{ fontSize: '0.74rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--text-secondary)' }}>
+          <span style={{ fontSize: '0.74rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#71717a' }}>
             Columns & Data Types
           </span>
-          <span className="mono" style={{ fontSize: '0.68rem', color: 'var(--text-dim)' }}>
+          <span className="mono" style={{ fontSize: '0.68rem', color: '#71717a' }}>
             {tableSchema.columns.length} fields
           </span>
         </div>
@@ -110,11 +111,11 @@ export const SchemaView: React.FC<SchemaViewProps> = ({ tableSchema }) => {
                   <td>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                       {Boolean(col.pk) ? (
-                        <span title="Primary Key"><Key size={13} color="var(--amber)" /></span>
+                        <span title="Primary Key"><Key size={13} color="#b45309" /></span>
                       ) : (
-                        <Hash size={13} color="var(--text-dim)" />
+                        <Hash size={13} color="#a1a1aa" />
                       )}
-                      <span style={{ fontWeight: 600, color: '#ffffff' }}>{col.name}</span>
+                      <span style={{ fontWeight: 600, color: '#09090b' }}>{col.name}</span>
                     </div>
                   </td>
                   <td>
@@ -128,20 +129,20 @@ export const SchemaView: React.FC<SchemaViewProps> = ({ tableSchema }) => {
                         PK (Index {col.pk})
                       </span>
                     ) : (
-                      <span style={{ color: 'var(--text-dim)', fontSize: '0.75rem' }}>—</span>
+                      <span style={{ color: '#a1a1aa', fontSize: '0.75rem' }}>—</span>
                     )}
                   </td>
                   <td>
                     {col.notnull ? (
-                      <span className="badge" style={{ background: 'rgba(244,63,94,0.1)', color: 'var(--red)', fontSize: '0.65rem' }}>
+                      <span className="badge" style={{ background: '#fef2f2', color: '#b91c1c', border: '1px solid #fecaca', fontSize: '0.65rem' }}>
                         NOT NULL
                       </span>
                     ) : (
-                      <span style={{ color: 'var(--green-light)', fontSize: '0.75rem' }}>NULLABLE</span>
+                      <span style={{ color: '#16a34a', fontSize: '0.75rem', fontWeight: 500 }}>NULLABLE</span>
                     )}
                   </td>
                   <td>
-                    <span className="mono" style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+                    <span className="mono" style={{ fontSize: '0.72rem', color: '#71717a' }}>
                       {col.dflt_value !== null && col.dflt_value !== undefined ? String(col.dflt_value) : 'None'}
                     </span>
                   </td>
@@ -155,38 +156,40 @@ export const SchemaView: React.FC<SchemaViewProps> = ({ tableSchema }) => {
       {/* SQL Definition */}
       {tableSchema.sql && (
         <div style={{
-          background: 'var(--bg-surface)',
-          border: '1px solid var(--border)',
+          background: '#ffffff',
+          border: '1px solid #e4e4e7',
           borderRadius: 'var(--radius-lg)',
-          overflow: 'hidden'
+          overflow: 'hidden',
+          boxShadow: 'var(--shadow-sm)'
         }}>
           <div style={{
             padding: '10px 16px',
-            background: 'var(--bg-elevated)',
-            borderBottom: '1px solid var(--border)',
+            background: '#fafafa',
+            borderBottom: '1px solid #e4e4e7',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between'
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <FileText size={13} color="var(--accent-light)" />
-              <span style={{ fontSize: '0.74rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--text-secondary)' }}>
+              <FileText size={13} color="#09090b" />
+              <span style={{ fontSize: '0.74rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#71717a' }}>
                 DDL Statement
               </span>
             </div>
-            <button onClick={copySql} className="btn btn-ghost btn-xs" style={{ gap: '4px' }}>
-              {copied ? <Check size={11} color="var(--green)" /> : <Copy size={11} />}
+            <button onClick={copySql} className="btn btn-secondary btn-xs" style={{ gap: '4px' }}>
+              {copied ? <Check size={11} color="#16a34a" /> : <Copy size={11} />}
               <span style={{ fontSize: '0.68rem' }}>{copied ? 'Copied' : 'Copy'}</span>
             </button>
           </div>
           <pre className="mono" style={{
             padding: '14px 16px',
-            fontSize: '0.78rem',
-            color: 'var(--text-secondary)',
+            fontSize: '0.82rem',
+            color: '#09090b',
             overflowX: 'auto',
             whiteSpace: 'pre-wrap',
             margin: 0,
-            background: 'rgba(0,0,0,0.2)'
+            background: '#f8fafc',
+            lineHeight: 1.5
           }}>
             {tableSchema.sql}
           </pre>

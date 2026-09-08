@@ -161,87 +161,103 @@ export const App: React.FC = () => {
     setIsAiLoading(true);
     try {
       const ctx = await sqliteService.getSchemaPromptContext();
-      const fixed = await geminiService.fixSqlError(failedSql, errorMsg, ctx);
-      setCurrentSql(fixed.sql);
-      setExplanation(fixed.explanation);
-      setIsMutation(fixed.isMutation);
-      await executeSql(fixed.sql, fixed.explanation);
-      showToast('Query fixed and executed successfully', 'success');
-    } catch (err: any) {
-      showToast(err?.message || 'Auto-fix failed', 'error');
+      const ai = await geminiService.fixSqlError(failedSql, errorMsg, ctx);
+
+      if (ai.isValid === false || !ai.sql || !ai.sql.trim()) {
+        showToast(ai.explanation || 'Could not auto-fix query', 'error');
+        return;
+      }
+
+      setCurrentSql(ai.sql);
+      setExplanation(ai.explanation);
+      setIsMutation(ai.isMutation);
+      setSuggestedChartType(ai.suggestedChartType || 'none');
+
+      if (ai.isMutation) {
+        setPendingMutation({ sql: ai.sql, explanation: ai.explanation });
+      } else {
+        await executeSql(ai.sql, ai.explanation);
+        showToast('Query auto-fixed and executed!', 'success');
+      }
+    } catch (e: any) {
+      showToast(e?.message || 'Auto-fix failed', 'error');
     } finally {
       setIsAiLoading(false);
     }
   };
 
-  const previewTable = async (name: string) => {
-    setSelectedTable(name);
-    const sql = `SELECT * FROM "${name}" LIMIT 50;`;
+  const previewTable = async (tableName: string) => {
+    setSelectedTable(tableName);
+    const sql = `SELECT * FROM "${tableName}" LIMIT 50;`;
     setCurrentSql(sql);
-    setExplanation(`Browsing table "${name}"`);
-    setIsMutation(false);
-    setSuggestedChartType('none');
-    await executeSql(sql, `Browsing table "${name}"`);
-  };
-
-  const handleCellUpdate = async (pkCol: string, pkVal: any, col: string, val: any): Promise<boolean> => {
-    if (!selectedTable) return false;
-    const ok = await sqliteService.updateCell(selectedTable, pkCol, pkVal, col, val);
-    if (ok) {
-      await refreshDb();
-      showToast('Record updated successfully', 'success');
-    }
-    return ok;
-  };
-
-  const handleDownload = () => {
-    const binary = sqliteService.exportBinary();
-    const blob = new Blob([binary.buffer as ArrayBuffer], { type: 'application/x-sqlite3' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = metadata.name.endsWith('.sqlite') || metadata.name.endsWith('.db') ? metadata.name : `${metadata.name}.sqlite`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    showToast('Database exported', 'success');
-  };
-
-  const handleUploadFile = async (file: File) => {
-    try {
-      const result = await sqliteService.importAnyFile(file);
-      await refreshDb();
-      if (result.tables && result.tables.length > 0) {
-        previewTable(result.tables[0]);
-      }
-      showToast(result.message, 'success');
-    } catch (err: any) {
-      showToast(err?.message || 'Failed to import file', 'error');
-      throw err;
-    }
-  };
-
-  const handleLoadSample = async (id: 'ecommerce' | 'saas') => {
-    await sqliteService.loadSample(id);
-    await refreshDb();
-    const s = await sqliteService.getSchema();
-    if (s.length > 0) previewTable(s[0].name);
-    showToast(`Loaded ${id === 'ecommerce' ? 'E-Commerce' : 'SaaS'} demo database`, 'info');
+    setExplanation(`Previewing rows from table "${tableName}"`);
+    setActiveTab('table');
+    await executeSql(sql);
   };
 
   const handleRollback = async () => {
     const ok = sqliteService.rollbackSnapshot();
     if (ok) {
       await refreshDb();
-      if (selectedTable) previewTable(selectedTable);
-      showToast('Changes reverted to previous snapshot', 'info');
+      if (selectedTable) {
+        await previewTable(selectedTable);
+      }
+      showToast('Database rolled back to prior snapshot', 'info');
+    } else {
+      showToast('No prior snapshot found to rollback', 'warning');
+    }
+  };
+
+  const handleUploadFile = async (file: File) => {
+    const res = await sqliteService.importAnyFile(file);
+    await refreshDb();
+    if (res.tables.length > 0) {
+      const first = res.tables[0];
+      await previewTable(first);
+      showToast(`Successfully imported: ${res.tables.join(', ')}`, 'success');
+    }
+  };
+
+  const handleLoadSample = async (sampleId: 'ecommerce' | 'saas') => {
+    await sqliteService.loadSample(sampleId);
+    await refreshDb();
+    const schemas = await sqliteService.getSchema();
+    if (schemas.length > 0) {
+      const table = sampleId === 'ecommerce' ? 'products' : schemas[0].name;
+      await previewTable(table);
+      showToast(`Loaded ${sampleId.toUpperCase()} sample dataset`, 'success');
+    }
+  };
+
+  const handleDownload = () => {
+    const data = sqliteService.exportBinary();
+    const blob = new Blob([data as unknown as BlobPart], { type: 'application/x-sqlite3' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = metadata.name.endsWith('.db') || metadata.name.endsWith('.sqlite') ? metadata.name : `${metadata.name}.sqlite`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    showToast('Database exported successfully', 'success');
+  };
+
+  const handleCellUpdate = async (pkCol: string, pkVal: any, col: string, newVal: any) => {
+    if (!selectedTable) return false;
+    const formattedVal = typeof newVal === 'number' ? newVal : `'${String(newVal).replace(/'/g, "''")}'`;
+    const formattedPk = typeof pkVal === 'number' ? pkVal : `'${String(pkVal).replace(/'/g, "''")}'`;
+    const sql = `UPDATE "${selectedTable}" SET "${col}" = ${formattedVal} WHERE "${pkCol}" = ${formattedPk};`;
+    try {
+      await executeSql(sql, `Updated ${col} in ${selectedTable}`);
+      return true;
+    } catch {
+      return false;
     }
   };
 
   const selectedTableSchema = tables.find((t) => t.name === selectedTable) || null;
 
-  // Render Landing Page if in landing view
+  // Render Landing Page View
   if (currentView === 'landing') {
     return (
       <>
@@ -268,10 +284,9 @@ export const App: React.FC = () => {
           <div className="animate-slide-up" style={{
             position: 'fixed', bottom: '24px', left: '50%', transform: 'translateX(-50%)',
             padding: '10px 20px', borderRadius: 'var(--radius-full)',
-            background: toast.type === 'error' ? 'var(--red-bg)' : toast.type === 'success' ? 'var(--green-bg)' : 'var(--bg-elevated)',
-            border: `1px solid ${toast.type === 'error' ? 'rgba(244,63,94,0.3)' : toast.type === 'success' ? 'rgba(16,185,129,0.3)' : 'var(--border)'}`,
-            color: toast.type === 'error' ? 'var(--red)' : toast.type === 'success' ? 'var(--green-light)' : '#ffffff',
-            boxShadow: 'var(--shadow-lg)', fontSize: '0.8rem', fontWeight: 600, zIndex: 9999,
+            background: '#09090b', border: '1px solid #27272a',
+            color: '#ffffff',
+            boxShadow: 'var(--shadow-lg)', fontSize: '0.82rem', fontWeight: 500, zIndex: 9999,
           }}>
             {toast.msg}
           </div>
@@ -313,32 +328,32 @@ export const App: React.FC = () => {
             <button
               onClick={() => setCurrentView('landing')}
               className="btn btn-ghost btn-xs"
-              style={{ gap: '5px', padding: '4px 8px' }}
+              style={{ gap: '5px', padding: '4px 8px', color: '#52525b' }}
               title="Return to Landing Page"
             >
               <ArrowLeft size={13} />
               <span>Landing</span>
             </button>
 
-            <div style={{ width: '1px', height: '16px', background: 'var(--border)' }} />
+            <div style={{ width: '1px', height: '16px', background: '#e4e4e7' }} />
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <Database size={15} color="var(--accent-light)" />
-              <span style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-secondary)' }}>
+              <Database size={15} color="#09090b" />
+              <span style={{ fontSize: '0.82rem', fontWeight: 600, color: '#52525b' }}>
                 {metadata.name}
               </span>
             </div>
 
             {selectedTable && (
               <>
-                <ChevronRight size={13} color="var(--text-dim)" />
+                <ChevronRight size={13} color="#a1a1aa" />
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <TableIcon size={14} color="var(--cyan-light)" />
-                  <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#ffffff' }}>
+                  <TableIcon size={14} color="#09090b" />
+                  <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#09090b' }}>
                     {selectedTable}
                   </span>
                   {selectedTableSchema && (
-                    <span className="badge badge-cyan" style={{ fontSize: '0.62rem' }}>
+                    <span className="badge badge-purple" style={{ fontSize: '0.65rem' }}>
                       {selectedTableSchema.rowCount} rows
                     </span>
                   )}
@@ -360,7 +375,7 @@ export const App: React.FC = () => {
               <button
                 onClick={() => { setAuthMode('signin'); setIsAuthOpen(true); }}
                 className="btn btn-ghost btn-sm"
-                style={{ fontSize: '0.76rem' }}
+                style={{ fontSize: '0.78rem', color: '#52525b' }}
               >
                 Sign In
               </button>
@@ -373,7 +388,7 @@ export const App: React.FC = () => {
                 title="Undo last change"
                 style={{ gap: '5px' }}
               >
-                <RotateCcw size={13} color="var(--amber)" />
+                <RotateCcw size={13} color="#09090b" />
                 <span>Undo</span>
               </button>
             )}
@@ -384,7 +399,7 @@ export const App: React.FC = () => {
               style={{ gap: '6px' }}
               title="Import Excel, CSV, JSON, or SQL"
             >
-              <Upload size={13} color="var(--cyan-light)" />
+              <Upload size={13} color="#09090b" />
               <span>Import</span>
             </button>
 
@@ -442,11 +457,12 @@ export const App: React.FC = () => {
                   <span>Data Grid</span>
                   {queryResult && queryResult.columns.length > 0 && (
                     <span style={{
-                      fontSize: '0.65rem',
+                      fontSize: '0.68rem',
                       padding: '1px 6px',
                       borderRadius: 'var(--radius-full)',
-                      background: activeTab === 'table' ? 'rgba(255,255,255,0.25)' : 'var(--bg-elevated)',
-                      color: activeTab === 'table' ? '#ffffff' : 'var(--text-dim)',
+                      background: activeTab === 'table' ? '#27272a' : '#f4f4f5',
+                      color: activeTab === 'table' ? '#ffffff' : '#71717a',
+                      fontWeight: 600,
                     }}>
                       {queryResult.rowCount}
                     </span>
@@ -460,7 +476,7 @@ export const App: React.FC = () => {
                   <BarChart2 size={13} />
                   <span>Visualizer</span>
                   {suggestedChartType && suggestedChartType !== 'none' && (
-                    <span className="pulse-dot" style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--cyan-light)' }} />
+                    <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: activeTab === 'chart' ? '#ffffff' : '#09090b' }} />
                   )}
                 </button>
 
@@ -474,9 +490,9 @@ export const App: React.FC = () => {
               </div>
 
               {selectedTable && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.74rem', color: 'var(--text-muted)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.76rem', color: '#71717a' }}>
                   <span>Active Table:</span>
-                  <span style={{ color: 'var(--accent-light)', fontWeight: 600 }}>{selectedTable}</span>
+                  <span style={{ color: '#09090b', fontWeight: 700 }}>{selectedTable}</span>
                 </div>
               )}
             </div>
@@ -549,12 +565,12 @@ export const App: React.FC = () => {
           transform: 'translateX(-50%)',
           padding: '10px 20px',
           borderRadius: 'var(--radius-full)',
-          background: toast.type === 'error' ? 'var(--red-bg)' : toast.type === 'warning' ? 'var(--amber-bg)' : toast.type === 'success' ? 'var(--green-bg)' : 'var(--bg-elevated)',
-          border: `1px solid ${toast.type === 'error' ? 'rgba(244,63,94,0.3)' : toast.type === 'warning' ? 'rgba(251,191,36,0.3)' : toast.type === 'success' ? 'rgba(16,185,129,0.3)' : 'var(--border)'}`,
-          color: toast.type === 'error' ? 'var(--red)' : toast.type === 'warning' ? 'var(--amber)' : toast.type === 'success' ? 'var(--green-light)' : '#ffffff',
+          background: '#09090b',
+          border: '1px solid #27272a',
+          color: '#ffffff',
           boxShadow: 'var(--shadow-lg)',
-          fontSize: '0.8rem',
-          fontWeight: 600,
+          fontSize: '0.82rem',
+          fontWeight: 500,
           zIndex: 9999,
           display: 'flex',
           alignItems: 'center',

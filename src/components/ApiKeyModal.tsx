@@ -69,10 +69,10 @@ export const ApiKeyModal: React.FC<ApiKeyModalProps> = ({ isOpen, onClose, onKey
           width: '100%',
           padding: '28px',
           borderRadius: 'var(--radius-xl)',
-          background: 'rgba(15, 17, 24, 0.98)',
-          border: '1px solid rgba(255, 255, 255, 0.12)',
-          boxShadow: '0 25px 70px rgba(0, 0, 0, 0.85), 0 0 35px rgba(139, 92, 246, 0.15)',
-          backdropFilter: 'blur(20px)',
+          background: '#ffffff',
+          border: '1px solid #e4e4e7',
+          boxShadow: 'var(--shadow-lg)',
+          color: '#09090b',
         }}
       >
         {/* Header */}
@@ -83,7 +83,7 @@ export const ApiKeyModal: React.FC<ApiKeyModalProps> = ({ isOpen, onClose, onKey
                 width: '28px',
                 height: '28px',
                 borderRadius: 'var(--radius-sm)',
-                background: 'linear-gradient(135deg, var(--accent) 0%, #06b6d4 100%)',
+                background: '#09090b',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -91,11 +91,11 @@ export const ApiKeyModal: React.FC<ApiKeyModalProps> = ({ isOpen, onClose, onKey
             >
               <Sparkles size={15} color="#fff" />
             </div>
-            <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#ffffff', margin: 0 }}>
+            <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#09090b', margin: 0 }}>
               Gemini AI Engine
             </h3>
           </div>
-          <button onClick={onClose} className="btn btn-ghost btn-xs" style={{ padding: '4px' }}>
+          <button onClick={onClose} className="btn btn-ghost btn-xs" style={{ padding: '4px', color: '#71717a' }}>
             <X size={16} />
           </button>
         </div>
@@ -105,8 +105,8 @@ export const ApiKeyModal: React.FC<ApiKeyModalProps> = ({ isOpen, onClose, onKey
           style={{
             padding: '12px 14px',
             borderRadius: 'var(--radius-md)',
-            background: isDefault ? 'rgba(52, 211, 153, 0.08)' : 'rgba(139, 92, 246, 0.08)',
-            border: isDefault ? '1px solid rgba(52, 211, 153, 0.25)' : '1px solid rgba(139, 92, 246, 0.25)',
+            background: '#fafafa',
+            border: '1px solid #e4e4e7',
             marginBottom: '18px',
             display: 'flex',
             alignItems: 'center',
@@ -116,15 +116,15 @@ export const ApiKeyModal: React.FC<ApiKeyModalProps> = ({ isOpen, onClose, onKey
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             {isDefault ? (
-              <ShieldCheck size={20} color="var(--green)" style={{ flexShrink: 0 }} />
+              <ShieldCheck size={20} color="#16a34a" style={{ flexShrink: 0 }} />
             ) : (
-              <Key size={18} color="var(--accent-light)" style={{ flexShrink: 0 }} />
+              <Key size={18} color="#09090b" style={{ flexShrink: 0 }} />
             )}
             <div>
-              <div style={{ fontSize: '0.82rem', fontWeight: 600, color: '#ffffff' }}>
+              <div style={{ fontSize: '0.82rem', fontWeight: 600, color: '#09090b' }}>
                 {isDefault ? 'Project API Key Secured & Active' : 'Custom User API Key Active'}
               </div>
-              <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>
+              <div style={{ fontSize: '0.72rem', color: '#71717a' }}>
                 {isDefault
                   ? 'Key is encrypted and hidden from public view for security.'
                   : 'Using your privately saved Gemini credentials.'}
@@ -136,7 +136,7 @@ export const ApiKeyModal: React.FC<ApiKeyModalProps> = ({ isOpen, onClose, onKey
             <button
               onClick={handleResetToDefault}
               className="btn btn-ghost btn-xs"
-              style={{ fontSize: '0.7rem', gap: '4px', color: 'var(--accent-light)', flexShrink: 0 }}
+              style={{ fontSize: '0.7rem', gap: '4px', color: '#09090b', flexShrink: 0 }}
               title="Switch back to built-in key"
             >
               <RotateCcw size={11} /> Reset to Default
@@ -151,7 +151,7 @@ export const ApiKeyModal: React.FC<ApiKeyModalProps> = ({ isOpen, onClose, onKey
               style={{
                 fontSize: '0.7rem',
                 fontWeight: 600,
-                color: 'var(--text-dim)',
+                color: '#71717a',
                 textTransform: 'uppercase',
                 letterSpacing: '0.06em',
               }}
@@ -169,7 +169,7 @@ export const ApiKeyModal: React.FC<ApiKeyModalProps> = ({ isOpen, onClose, onKey
               style={{
                 background: 'none',
                 border: 'none',
-                color: 'var(--accent-light)',
+                color: '#09090b',
                 fontSize: '0.72rem',
                 fontWeight: 600,
                 cursor: 'pointer',
@@ -187,15 +187,15 @@ export const ApiKeyModal: React.FC<ApiKeyModalProps> = ({ isOpen, onClose, onKey
               style={{
                 padding: '10px 14px',
                 borderRadius: 'var(--radius-md)',
-                background: 'var(--bg-elevated)',
-                border: '1px solid var(--border)',
+                background: '#fafafa',
+                border: '1px solid #e4e4e7',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span className="mono" style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', letterSpacing: '0.15em' }}>
+                <span className="mono" style={{ fontSize: '0.85rem', color: '#71717a', letterSpacing: '0.15em' }}>
                   ••••••••••••••••••••••••••••
                 </span>
                 <span
@@ -203,15 +203,16 @@ export const ApiKeyModal: React.FC<ApiKeyModalProps> = ({ isOpen, onClose, onKey
                     fontSize: '0.65rem',
                     padding: '2px 7px',
                     borderRadius: 'var(--radius-full)',
-                    background: 'rgba(52, 211, 153, 0.12)',
-                    color: 'var(--green)',
+                    background: '#f0fdf4',
+                    border: '1px solid #bbf7d0',
+                    color: '#166534',
                     fontWeight: 600,
                   }}
                 >
                   Secured
                 </span>
               </div>
-              <span style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>Pre-configured</span>
+              <span style={{ fontSize: '0.72rem', color: '#a1a1aa' }}>Pre-configured</span>
             </div>
           ) : (
             /* If Custom Key Mode */
@@ -232,13 +233,13 @@ export const ApiKeyModal: React.FC<ApiKeyModalProps> = ({ isOpen, onClose, onKey
                   type="button"
                   onClick={() => setShowCustomKey(!showCustomKey)}
                   className="btn btn-ghost btn-xs"
-                  style={{ position: 'absolute', right: '6px', top: '50%', transform: 'translateY(-50%)' }}
+                  style={{ position: 'absolute', right: '6px', top: '50%', transform: 'translateY(-50%)', color: '#71717a' }}
                   title={showCustomKey ? 'Hide key' : 'Show key'}
                 >
                   {showCustomKey ? <EyeOff size={14} /> : <Eye size={14} />}
                 </button>
               </div>
-              <span style={{ display: 'block', fontSize: '0.67rem', color: 'var(--text-dim)', marginTop: '5px' }}>
+              <span style={{ display: 'block', fontSize: '0.68rem', color: '#71717a', marginTop: '5px' }}>
                 Your custom key is saved exclusively in your browser's private local storage.
               </span>
             </div>
@@ -252,7 +253,7 @@ export const ApiKeyModal: React.FC<ApiKeyModalProps> = ({ isOpen, onClose, onKey
               display: 'block',
               fontSize: '0.7rem',
               fontWeight: 600,
-              color: 'var(--text-dim)',
+              color: '#71717a',
               marginBottom: '6px',
               textTransform: 'uppercase',
               letterSpacing: '0.06em',
@@ -280,15 +281,15 @@ export const ApiKeyModal: React.FC<ApiKeyModalProps> = ({ isOpen, onClose, onKey
               padding: '8px 12px',
               borderRadius: 'var(--radius-sm)',
               marginBottom: '16px',
-              background: testOk ? 'var(--green-bg)' : 'var(--red-bg)',
-              border: `1px solid ${testOk ? 'rgba(52, 211, 153, 0.25)' : 'rgba(248, 113, 113, 0.25)'}`,
+              background: testOk ? '#f0fdf4' : '#fef2f2',
+              border: `1px solid ${testOk ? '#bbf7d0' : '#fecaca'}`,
               display: 'flex',
               alignItems: 'center',
               gap: '8px',
             }}
           >
-            {testOk ? <CheckCircle2 size={15} color="var(--green)" /> : <XCircle size={15} color="var(--red)" />}
-            <span style={{ fontSize: '0.76rem', fontWeight: 500, color: testOk ? 'var(--green)' : 'var(--red)' }}>
+            {testOk ? <CheckCircle2 size={15} color="#16a34a" /> : <XCircle size={15} color="#b91c1c" />}
+            <span style={{ fontSize: '0.76rem', fontWeight: 500, color: testOk ? '#166534' : '#b91c1c' }}>
               {testOk
                 ? 'Gemini connection verified and active!'
                 : 'Connection failed. Please check network or key validity.'}

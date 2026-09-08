@@ -22,7 +22,7 @@ export const ParticleSphere: React.FC = () => {
     window.addEventListener('resize', handleResize);
 
     // Generate points uniformly on a sphere surface (Fibonacci sphere algorithm)
-    const NUM_PARTICLES = 520;
+    const NUM_PARTICLES = 500;
     const radius = Math.min(width, height) * 0.42;
     const particles: { x: number; y: number; z: number; baseSize: number }[] = [];
 
@@ -40,7 +40,7 @@ export const ParticleSphere: React.FC = () => {
         x: x * radius,
         y: y * radius,
         z: z * radius,
-        baseSize: Math.random() * 1.5 + 1.2,
+        baseSize: Math.random() * 1.3 + 1.1,
       });
     }
 
@@ -77,12 +77,12 @@ export const ParticleSphere: React.FC = () => {
       // Sort particles by depth Z for realistic perspective drawing
       const projected = particles.map((p) => {
         // Rotate around Y axis
-        let x1 = p.x * cosY - p.z * sinY;
-        let z1 = p.z * cosY + p.x * sinY;
+        const x1 = p.x * cosY - p.z * sinY;
+        const z1 = p.z * cosY + p.x * sinY;
 
         // Rotate around X axis
-        let y1 = p.y * cosX - z1 * sinX;
-        let z2 = z1 * cosX + p.y * sinX;
+        const y1 = p.y * cosX - z1 * sinX;
+        const z2 = z1 * cosX + p.y * sinX;
 
         // Perspective projection
         const fov = 450;
@@ -90,8 +90,8 @@ export const ParticleSphere: React.FC = () => {
         const x2D = cx + x1 * scale;
         const y2D = cy + y1 * scale;
 
-        // Opacity and color based on depth Z
-        const alpha = Math.max(0.08, Math.min(0.9, (z2 + radius) / (2 * radius)));
+        // Opacity based on depth Z
+        const alpha = Math.max(0.1, Math.min(0.95, (z2 + radius) / (2 * radius)));
 
         return {
           x: x2D,
@@ -104,10 +104,10 @@ export const ParticleSphere: React.FC = () => {
 
       // Update positions back to particle structure
       for (let i = 0; i < particles.length; i++) {
-        let x1 = particles[i].x * cosY - particles[i].z * sinY;
-        let z1 = particles[i].z * cosY + particles[i].x * sinY;
-        let y1 = particles[i].y * cosX - z1 * sinX;
-        let z2 = z1 * cosX + particles[i].y * sinX;
+        const x1 = particles[i].x * cosY - particles[i].z * sinY;
+        const z1 = particles[i].z * cosY + particles[i].x * sinY;
+        const y1 = particles[i].y * cosX - z1 * sinX;
+        const z2 = z1 * cosX + particles[i].y * sinX;
 
         particles[i].x = x1;
         particles[i].y = y1;
@@ -116,22 +116,21 @@ export const ParticleSphere: React.FC = () => {
 
       projected.sort((a, b) => a.z - b.z);
 
-      // Draw subtle orbital latitude lines
-      ctx.strokeStyle = 'rgba(139, 92, 246, 0.04)';
+      // Draw subtle orbital rings (minimalist hairline)
+      ctx.strokeStyle = 'rgba(0, 0, 0, 0.05)';
       ctx.lineWidth = 1;
       ctx.beginPath();
       ctx.arc(cx, cy, radius * 0.95, 0, Math.PI * 2);
       ctx.stroke();
 
-      // Draw points
+      // Draw points with clean black & charcoal ink aesthetic
       for (const p of projected) {
         ctx.beginPath();
         ctx.arc(p.x, p.y, Math.max(0.6, p.size), 0, Math.PI * 2);
-        // Subtle color shifting based on depth
         if (p.z > 0) {
-          ctx.fillStyle = `rgba(167, 139, 250, ${p.alpha * 0.95})`; // violet glow in front
+          ctx.fillStyle = `rgba(9, 9, 11, ${p.alpha * 0.9})`; // deep black/charcoal in front
         } else {
-          ctx.fillStyle = `rgba(203, 213, 225, ${p.alpha * 0.5})`; // dim slate in back
+          ctx.fillStyle = `rgba(161, 161, 170, ${p.alpha * 0.5})`; // muted silver in back
         }
         ctx.fill();
       }
@@ -156,7 +155,6 @@ export const ParticleSphere: React.FC = () => {
           width: '100%',
           height: '100%',
           display: 'block',
-          filter: 'drop-shadow(0 0 35px rgba(139, 92, 246, 0.2))',
         }}
       />
     </div>

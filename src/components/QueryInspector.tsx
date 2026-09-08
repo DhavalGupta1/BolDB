@@ -43,8 +43,8 @@ export const QueryInspector: React.FC<QueryInspectorProps> = ({
 
   return (
     <div className="animate-slide-up" style={{
-      background: 'var(--bg-surface)',
-      border: '1px solid var(--border)',
+      background: '#ffffff',
+      border: '1px solid #e4e4e7',
       borderRadius: 'var(--radius-lg)',
       overflow: 'hidden',
       boxShadow: 'var(--shadow-sm)'
@@ -55,8 +55,8 @@ export const QueryInspector: React.FC<QueryInspectorProps> = ({
         alignItems: 'center',
         justifyContent: 'space-between',
         padding: '8px 14px',
-        background: 'var(--bg-elevated)',
-        borderBottom: collapsed ? 'none' : '1px solid var(--border)',
+        background: '#fafafa',
+        borderBottom: collapsed ? 'none' : '1px solid #e4e4e7',
         flexWrap: 'wrap',
         gap: '8px'
       }}>
@@ -64,14 +64,14 @@ export const QueryInspector: React.FC<QueryInspectorProps> = ({
           <button
             onClick={() => setCollapsed(!collapsed)}
             className="btn btn-ghost btn-xs"
-            style={{ padding: '3px' }}
+            style={{ padding: '3px', color: '#71717a' }}
           >
             {collapsed ? <ChevronDown size={13} /> : <ChevronUp size={13} />}
           </button>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-            <Terminal size={13} color="var(--cyan-light)" />
-            <span className="mono" style={{ fontSize: '0.72rem', fontWeight: 600, color: 'var(--text)' }}>
+            <Terminal size={13} color="#09090b" />
+            <span className="mono" style={{ fontSize: '0.72rem', fontWeight: 600, color: '#09090b' }}>
               SQL STUDIO
             </span>
           </div>
@@ -93,7 +93,7 @@ export const QueryInspector: React.FC<QueryInspectorProps> = ({
           )}
 
           {result?.rowCount !== undefined && (
-            <span className="mono" style={{ fontSize: '0.68rem', color: 'var(--text-dim)' }}>
+            <span className="mono" style={{ fontSize: '0.68rem', color: '#71717a' }}>
               ({result.rowCount} rows returned)
             </span>
           )}
@@ -113,7 +113,7 @@ export const QueryInspector: React.FC<QueryInspectorProps> = ({
             className="btn btn-secondary btn-xs"
             title="Copy SQL Query"
           >
-            {copied ? <Check size={11} color="var(--green)" /> : <Copy size={11} />}
+            {copied ? <Check size={11} color="#16a34a" /> : <Copy size={11} />}
             <span>{copied ? 'Copied' : 'Copy'}</span>
           </button>
 
@@ -123,7 +123,7 @@ export const QueryInspector: React.FC<QueryInspectorProps> = ({
             className="btn btn-primary btn-xs"
             style={{ gap: '4px' }}
           >
-            <Play size={11} /> Run
+            <Play size={11} fill="currentColor" /> Run
           </button>
         </div>
       </div>
@@ -138,11 +138,11 @@ export const QueryInspector: React.FC<QueryInspectorProps> = ({
               gap: '8px',
               padding: '6px 12px',
               borderRadius: 'var(--radius-sm)',
-              background: 'rgba(139, 92, 246, 0.08)',
-              border: '1px solid rgba(139, 92, 246, 0.2)',
+              background: '#f4f4f5',
+              border: '1px solid #e4e4e7',
             }}>
-              <Sparkles size={13} color="var(--accent-light)" style={{ flexShrink: 0 }} />
-              <span style={{ fontSize: '0.75rem', color: 'var(--accent-light)', fontWeight: 500 }}>
+              <Sparkles size={13} color="#09090b" style={{ flexShrink: 0 }} />
+              <span style={{ fontSize: '0.76rem', color: '#27272a', fontWeight: 500 }}>
                 {explanation}
               </span>
             </div>
@@ -157,12 +157,12 @@ export const QueryInspector: React.FC<QueryInspectorProps> = ({
               className="mono"
               style={{
                 width: '100%',
-                background: 'var(--bg-input)',
-                border: '1px solid var(--border-focus)',
+                background: '#ffffff',
+                border: '1px solid #09090b',
                 borderRadius: 'var(--radius-sm)',
                 padding: '10px 14px',
-                color: '#ffffff',
-                fontSize: '0.82rem',
+                color: '#09090b',
+                fontSize: '0.84rem',
                 outline: 'none',
                 resize: 'vertical',
                 lineHeight: 1.5,
@@ -172,10 +172,10 @@ export const QueryInspector: React.FC<QueryInspectorProps> = ({
             <pre className="mono" style={{
               padding: '12px 14px',
               borderRadius: 'var(--radius-sm)',
-              background: 'rgba(0, 0, 0, 0.25)',
-              border: '1px solid var(--border-subtle)',
-              fontSize: '0.82rem',
-              color: '#38bdf8',
+              background: '#f8fafc',
+              border: '1px solid #e4e4e7',
+              fontSize: '0.84rem',
+              color: '#09090b',
               overflowX: 'auto',
               whiteSpace: 'pre-wrap',
               lineHeight: 1.6,
@@ -190,8 +190,8 @@ export const QueryInspector: React.FC<QueryInspectorProps> = ({
             <div style={{
               padding: '10px 14px',
               borderRadius: 'var(--radius-md)',
-              background: 'var(--red-bg)',
-              border: '1px solid rgba(244, 63, 94, 0.25)',
+              background: '#fef2f2',
+              border: '1px solid #fecaca',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
@@ -199,8 +199,8 @@ export const QueryInspector: React.FC<QueryInspectorProps> = ({
               flexWrap: 'wrap'
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <AlertTriangle size={15} color="var(--red)" />
-                <span className="mono" style={{ fontSize: '0.74rem', color: 'var(--red)' }}>
+                <AlertTriangle size={15} color="#b91c1c" />
+                <span className="mono" style={{ fontSize: '0.74rem', color: '#b91c1c' }}>
                   {result?.error}
                 </span>
               </div>
@@ -208,7 +208,7 @@ export const QueryInspector: React.FC<QueryInspectorProps> = ({
                 <button
                   onClick={() => onAutoFix(editable, result?.error || '')}
                   className="btn btn-xs"
-                  style={{ background: 'var(--red)', color: '#fff', gap: '4px' }}
+                  style={{ background: '#b91c1c', color: '#fff', gap: '4px' }}
                 >
                   <Wrench size={11} /> Auto-Fix with AI
                 </button>

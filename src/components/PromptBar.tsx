@@ -51,7 +51,6 @@ export const PromptBar: React.FC<PromptBarProps> = ({
     const trimmed = prompt.trim();
     if (!trimmed || isLoading) return;
 
-    // Quick check for meaningless repetition or pure punctuation
     if (!/[a-zA-Z0-9]/.test(trimmed)) {
       setLocalError('Please input valid text or a query related to the database.');
       return;
@@ -80,18 +79,11 @@ export const PromptBar: React.FC<PromptBarProps> = ({
         style={{
           position: 'relative',
           borderRadius: 'var(--radius-lg)',
-          padding: '2px',
-          background: activeError
-            ? 'linear-gradient(135deg, rgba(248, 113, 113, 0.8) 0%, rgba(239, 68, 68, 0.4) 100%)'
-            : isFocused
-            ? 'linear-gradient(135deg, var(--accent) 0%, #06b6d4 50%, #ec4899 100%)'
-            : 'linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%)',
-          boxShadow: activeError
-            ? '0 0 20px rgba(248, 113, 113, 0.25)'
-            : isFocused
-            ? '0 0 25px rgba(139, 92, 246, 0.25)'
-            : 'var(--shadow-sm)',
-          transition: 'all 0.25s var(--ease)',
+          border: activeError ? '1px solid #ef4444' : isFocused ? '1px solid #09090b' : '1px solid #e4e4e7',
+          boxShadow: isFocused ? '0 0 0 1px #09090b, var(--shadow-sm)' : 'var(--shadow-sm)',
+          background: '#ffffff',
+          transition: 'border-color 0.15s, box-shadow 0.15s',
+          overflow: 'hidden',
         }}
       >
         <div
@@ -99,9 +91,8 @@ export const PromptBar: React.FC<PromptBarProps> = ({
             display: 'flex',
             alignItems: 'center',
             gap: '12px',
-            background: 'var(--bg-surface)',
-            borderRadius: 'calc(var(--radius-lg) - 2px)',
-            padding: '8px 12px 8px 18px',
+            background: '#ffffff',
+            padding: '8px 12px 8px 16px',
           }}
         >
           <div
@@ -109,7 +100,7 @@ export const PromptBar: React.FC<PromptBarProps> = ({
               width: '28px',
               height: '28px',
               borderRadius: 'var(--radius-sm)',
-              background: activeError ? 'var(--red-bg)' : 'var(--accent-bg)',
+              background: activeError ? '#fef2f2' : '#f4f4f5',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -117,11 +108,11 @@ export const PromptBar: React.FC<PromptBarProps> = ({
             }}
           >
             {isLoading ? (
-              <Loader2 size={16} className="animate-spin" color="var(--accent-light)" />
+              <Loader2 size={16} className="animate-spin" color="#09090b" />
             ) : activeError ? (
-              <AlertCircle size={16} color="var(--red)" />
+              <AlertCircle size={16} color="#b91c1c" />
             ) : (
-              <Sparkles size={16} color="var(--accent-light)" />
+              <Sparkles size={16} color="#09090b" />
             )}
           </div>
 
@@ -143,8 +134,8 @@ export const PromptBar: React.FC<PromptBarProps> = ({
               background: 'transparent',
               border: 'none',
               outline: 'none',
-              color: '#ffffff',
-              fontSize: '0.92rem',
+              color: '#09090b',
+              fontSize: '0.9rem',
               fontWeight: 500,
               fontFamily: 'inherit',
               padding: '6px 0',
@@ -155,7 +146,7 @@ export const PromptBar: React.FC<PromptBarProps> = ({
             <button
               onClick={handleClear}
               className="btn btn-ghost btn-xs"
-              style={{ padding: '4px' }}
+              style={{ padding: '4px', color: '#71717a' }}
               title="Clear input"
             >
               <X size={14} />
@@ -171,7 +162,6 @@ export const PromptBar: React.FC<PromptBarProps> = ({
               padding: '7px 14px',
               fontWeight: 600,
               gap: '6px',
-              background: activeError ? 'var(--red)' : undefined,
             }}
           >
             {isLoading ? (
@@ -210,9 +200,9 @@ export const PromptBar: React.FC<PromptBarProps> = ({
             gap: '8px',
             padding: '8px 14px',
             borderRadius: 'var(--radius-md)',
-            background: 'rgba(239, 68, 68, 0.08)',
-            border: '1px solid rgba(239, 68, 68, 0.25)',
-            color: '#f87171',
+            background: '#fef2f2',
+            border: '1px solid #fecaca',
+            color: '#b91c1c',
             fontSize: '0.8rem',
           }}
         >
@@ -226,7 +216,7 @@ export const PromptBar: React.FC<PromptBarProps> = ({
               if (onClearError) onClearError();
             }}
             className="btn btn-ghost btn-xs"
-            style={{ color: '#f87171', padding: '2px' }}
+            style={{ color: '#b91c1c', padding: '2px' }}
             title="Dismiss"
           >
             <X size={13} />
@@ -240,7 +230,7 @@ export const PromptBar: React.FC<PromptBarProps> = ({
           style={{
             fontSize: '0.68rem',
             fontWeight: 600,
-            color: 'var(--text-dim)',
+            color: '#71717a',
             textTransform: 'uppercase',
             letterSpacing: '0.05em',
           }}
@@ -256,28 +246,25 @@ export const PromptBar: React.FC<PromptBarProps> = ({
               alignItems: 'center',
               gap: '5px',
               padding: '4px 10px',
-              fontSize: '0.72rem',
+              fontSize: '0.74rem',
               fontWeight: 500,
               fontFamily: 'inherit',
-              background: 'var(--bg-elevated)',
-              color: 'var(--text-secondary)',
-              border: '1px solid var(--border)',
+              background: '#ffffff',
+              color: '#52525b',
+              border: '1px solid #e4e4e7',
               borderRadius: 'var(--radius-full)',
               cursor: 'pointer',
               outline: 'none',
+              boxShadow: 'var(--shadow-sm)',
               transition: 'all 0.15s ease',
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.borderColor = 'rgba(139,92,246,0.4)';
-              e.currentTarget.style.color = '#ffffff';
-              e.currentTarget.style.background = 'var(--accent-bg)';
-              e.currentTarget.style.transform = 'translateY(-1px)';
+              e.currentTarget.style.borderColor = '#09090b';
+              e.currentTarget.style.color = '#09090b';
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.borderColor = 'var(--border)';
-              e.currentTarget.style.color = 'var(--text-secondary)';
-              e.currentTarget.style.background = 'var(--bg-elevated)';
-              e.currentTarget.style.transform = 'none';
+              e.currentTarget.style.borderColor = '#e4e4e7';
+              e.currentTarget.style.color = '#52525b';
             }}
           >
             <span>{s.icon}</span>

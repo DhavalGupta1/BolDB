@@ -49,14 +49,14 @@ export const DataGrid: React.FC<DataGridProps> = ({ result, onCellUpdate }) => {
       <div style={{
         padding: '70px 20px',
         textAlign: 'center',
-        background: 'var(--bg-surface)',
+        background: '#ffffff',
         borderRadius: 'var(--radius-lg)',
-        border: '1px solid var(--border)',
-        color: 'var(--text-muted)'
+        border: '1px solid #e4e4e7',
+        color: '#71717a'
       }}>
         <Database size={36} style={{ margin: '0 auto 12px', opacity: 0.3 }} />
-        <p style={{ fontSize: '0.92rem', fontWeight: 600, color: 'var(--text)' }}>No Records to Display</p>
-        <p style={{ fontSize: '0.76rem', color: 'var(--text-dim)', marginTop: '4px' }}>
+        <p style={{ fontSize: '0.92rem', fontWeight: 600, color: '#09090b' }}>No Records to Display</p>
+        <p style={{ fontSize: '0.78rem', color: '#71717a', marginTop: '4px' }}>
           Select a table from the sidebar or enter a prompt above to view data
         </p>
       </div>
@@ -115,15 +115,15 @@ export const DataGrid: React.FC<DataGridProps> = ({ result, onCellUpdate }) => {
         alignItems: 'center',
         justifyContent: 'space-between',
         padding: '10px 16px',
-        background: 'var(--bg-elevated)',
-        borderBottom: '1px solid var(--border)',
+        background: '#fafafa',
+        borderBottom: '1px solid #e4e4e7',
         flexWrap: 'wrap',
         gap: '10px'
       }}>
         {/* Search & Counter */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <div style={{ position: 'relative' }}>
-            <Search size={13} color="var(--text-dim)" style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)' }} />
+            <Search size={13} color="#a1a1aa" style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)' }} />
             <input
               className="input"
               placeholder="Search in records..."
@@ -141,7 +141,7 @@ export const DataGrid: React.FC<DataGridProps> = ({ result, onCellUpdate }) => {
               {filtered.length} row{filtered.length === 1 ? '' : 's'}
             </span>
             {search && (
-              <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+              <span style={{ fontSize: '0.72rem', color: '#71717a' }}>
                 (filtered from {result.values.length})
               </span>
             )}
@@ -151,8 +151,8 @@ export const DataGrid: React.FC<DataGridProps> = ({ result, onCellUpdate }) => {
         {/* Actions */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           {onCellUpdate && pkIdx !== -1 && (
-            <span style={{ fontSize: '0.68rem', color: 'var(--text-dim)', display: 'flex', alignItems: 'center', gap: '3px' }}>
-              <Edit3 size={10} /> Double-click cell to edit
+            <span style={{ fontSize: '0.7rem', color: '#71717a', display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <Edit3 size={11} /> Double-click cell to edit
             </span>
           )}
 
@@ -163,7 +163,7 @@ export const DataGrid: React.FC<DataGridProps> = ({ result, onCellUpdate }) => {
       </div>
 
       {/* Table Grid Scrollable Area */}
-      <div style={{ overflowX: 'auto', maxHeight: '560px' }}>
+      <div style={{ overflowX: 'auto', maxHeight: '560px', background: '#ffffff' }}>
         <table className="data-table">
           <thead>
             <tr>
@@ -173,12 +173,12 @@ export const DataGrid: React.FC<DataGridProps> = ({ result, onCellUpdate }) => {
                 return (
                   <th key={col} onClick={() => toggleSort(col)}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '6px' }}>
-                      <span style={{ color: isSorted ? 'var(--accent-light)' : 'inherit' }}>
+                      <span style={{ color: isSorted ? '#000000' : 'inherit', fontWeight: isSorted ? 700 : 600 }}>
                         {col}
                       </span>
                       <ArrowUpDown
                         size={10}
-                        color={isSorted ? 'var(--accent-light)' : 'var(--text-dim)'}
+                        color={isSorted ? '#000000' : '#a1a1aa'}
                         style={{ transform: isSorted && !sortAsc ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s' }}
                       />
                     </div>
@@ -190,9 +190,9 @@ export const DataGrid: React.FC<DataGridProps> = ({ result, onCellUpdate }) => {
           <tbody>
             {rows.length === 0 ? (
               <tr>
-                <td colSpan={result.columns.length + 1} style={{ textAlign: 'center', padding: '36px', color: 'var(--text-dim)' }}>
+                <td colSpan={result.columns.length + 1} style={{ textAlign: 'center', padding: '36px', color: '#71717a' }}>
                   <Filter size={20} style={{ margin: '0 auto 6px', opacity: 0.3 }} />
-                  <p style={{ fontSize: '0.78rem' }}>No rows matched your search filter</p>
+                  <p style={{ fontSize: '0.8rem' }}>No rows matched your search filter</p>
                 </td>
               </tr>
             ) : (
@@ -200,7 +200,7 @@ export const DataGrid: React.FC<DataGridProps> = ({ result, onCellUpdate }) => {
                 const globalRowIndex = (page - 1) * pageSize + ri + 1;
                 return (
                   <tr key={ri}>
-                    <td style={{ textAlign: 'center', color: 'var(--text-dim)', fontSize: '0.72rem', userSelect: 'none' }}>
+                    <td style={{ textAlign: 'center', color: '#a1a1aa', fontSize: '0.72rem', userSelect: 'none' }}>
                       {globalRowIndex}
                     </td>
                     {row.map((val, ci) => {
@@ -217,7 +217,7 @@ export const DataGrid: React.FC<DataGridProps> = ({ result, onCellUpdate }) => {
                           }}
                           style={{
                             cursor: onCellUpdate && pkIdx !== -1 && !isPk ? 'cell' : 'default',
-                            background: isEditing ? 'rgba(139, 92, 246, 0.1)' : 'transparent',
+                            background: isEditing ? '#f4f4f5' : 'transparent',
                           }}
                         >
                           {isEditing ? (
@@ -236,22 +236,22 @@ export const DataGrid: React.FC<DataGridProps> = ({ result, onCellUpdate }) => {
                                   fontSize: '0.78rem',
                                   height: '26px',
                                   minWidth: '120px',
-                                  borderColor: 'var(--accent)',
+                                  borderColor: '#09090b',
                                 }}
                               />
                               <button onClick={saveCell} className="btn btn-ghost btn-xs" style={{ padding: '2px' }} title="Save">
-                                <Check size={12} color="var(--green)" />
+                                <Check size={12} color="#16a34a" />
                               </button>
                               <button onClick={() => setEditCell(null)} className="btn btn-ghost btn-xs" style={{ padding: '2px' }} title="Cancel">
-                                <X size={12} color="var(--red)" />
+                                <X size={12} color="#b91c1c" />
                               </button>
                             </div>
                           ) : (
                             <span style={{
-                              color: val === null ? 'var(--text-dim)' : typeof val === 'number' ? 'var(--cyan-light)' : 'var(--text)',
+                              color: val === null ? '#a1a1aa' : '#09090b',
                               fontStyle: val === null ? 'italic' : 'normal',
                               fontWeight: isPk ? 600 : 400,
-                              fontSize: '0.8rem',
+                              fontSize: '0.82rem',
                             }}>
                               {val === null ? 'NULL' : String(val)}
                             </span>
@@ -273,28 +273,30 @@ export const DataGrid: React.FC<DataGridProps> = ({ result, onCellUpdate }) => {
         alignItems: 'center',
         justifyContent: 'space-between',
         padding: '10px 16px',
-        background: 'var(--bg-elevated)',
-        borderTop: '1px solid var(--border)',
-        fontSize: '0.74rem',
-        color: 'var(--text-secondary)'
+        background: '#fafafa',
+        borderTop: '1px solid #e4e4e7',
+        fontSize: '0.75rem',
+        color: '#71717a'
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <span>
-            Page <strong style={{ color: '#ffffff' }}>{page}</strong> of <strong style={{ color: '#ffffff' }}>{totalPages}</strong>
+            Page <strong style={{ color: '#09090b' }}>{page}</strong> of <strong style={{ color: '#09090b' }}>{totalPages}</strong>
           </span>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <span style={{ color: 'var(--text-dim)', fontSize: '0.7rem' }}>Show:</span>
+            <span style={{ color: '#a1a1aa', fontSize: '0.7rem' }}>Show:</span>
             {[25, 50, 100].map((size) => (
               <button
                 key={size}
                 onClick={() => { setPageSize(size); setPage(1); }}
                 className="btn btn-ghost btn-xs"
                 style={{
-                  padding: '2px 6px',
-                  fontSize: '0.68rem',
-                  background: pageSize === size ? 'var(--accent)' : 'transparent',
-                  color: pageSize === size ? '#ffffff' : 'var(--text-muted)',
+                  padding: '2px 7px',
+                  fontSize: '0.7rem',
+                  background: pageSize === size ? '#09090b' : 'transparent',
+                  color: pageSize === size ? '#ffffff' : '#71717a',
+                  borderRadius: 'var(--radius-xs)',
+                  fontWeight: pageSize === size ? 600 : 500,
                 }}
               >
                 {size}
@@ -308,7 +310,7 @@ export const DataGrid: React.FC<DataGridProps> = ({ result, onCellUpdate }) => {
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={page === 1}
             className="btn btn-secondary btn-xs"
-            style={{ padding: '4px 8px' }}
+            style={{ padding: '4px 10px' }}
           >
             <ChevronLeft size={13} /> Prev
           </button>
@@ -316,7 +318,7 @@ export const DataGrid: React.FC<DataGridProps> = ({ result, onCellUpdate }) => {
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             disabled={page === totalPages}
             className="btn btn-secondary btn-xs"
-            style={{ padding: '4px 8px' }}
+            style={{ padding: '4px 10px' }}
           >
             Next <ChevronRight size={13} />
           </button>

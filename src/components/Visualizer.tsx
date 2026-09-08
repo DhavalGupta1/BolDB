@@ -11,9 +11,9 @@ interface VisualizerProps {
   suggestedType?: 'bar' | 'line' | 'pie' | 'none';
 }
 
-const NEON_COLORS = [
-  '#8b5cf6', '#06b6d4', '#ec4899', '#10b981', '#f59e0b',
-  '#6366f1', '#3b82f6', '#14b8a6', '#f43f5e', '#a855f7'
+const MONOCHROME_COLORS = [
+  '#09090b', '#27272a', '#52525b', '#71717a', '#a1a1aa',
+  '#d4d4d8', '#18181b', '#3f3f46', '#e4e4e7'
 ];
 
 export const Visualizer: React.FC<VisualizerProps> = ({ result, suggestedType = 'bar' }) => {
@@ -90,16 +90,16 @@ export const Visualizer: React.FC<VisualizerProps> = ({ result, suggestedType = 
       <div style={{
         padding: '70px 20px',
         textAlign: 'center',
-        background: 'var(--bg-surface)',
+        background: '#ffffff',
         borderRadius: 'var(--radius-lg)',
-        border: '1px solid var(--border)',
-        color: 'var(--text-muted)'
+        border: '1px solid #e4e4e7',
+        color: '#71717a'
       }}>
         <BarChart3 size={36} style={{ margin: '0 auto 12px', opacity: 0.3 }} />
-        <p style={{ fontSize: '0.92rem', fontWeight: 600, color: 'var(--text)' }}>
+        <p style={{ fontSize: '0.92rem', fontWeight: 600, color: '#09090b' }}>
           No Numeric Chartable Data
         </p>
-        <p style={{ fontSize: '0.76rem', color: 'var(--text-dim)', marginTop: '4px' }}>
+        <p style={{ fontSize: '0.78rem', color: '#71717a', marginTop: '4px' }}>
           Query must return at least one text category column and one numeric metric column
         </p>
       </div>
@@ -110,17 +110,16 @@ export const Visualizer: React.FC<VisualizerProps> = ({ result, suggestedType = 
     if (active && payload && payload.length) {
       return (
         <div style={{
-          background: 'rgba(14, 16, 23, 0.95)',
-          border: '1px solid var(--border-hover)',
+          background: '#ffffff',
+          border: '1px solid #e4e4e7',
           borderRadius: 'var(--radius-sm)',
           padding: '8px 12px',
           boxShadow: 'var(--shadow-md)',
-          backdropFilter: 'blur(8px)',
         }}>
-          <p style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', marginBottom: '4px' }}>
-            {labelKey}: <strong style={{ color: '#fff' }}>{label}</strong>
+          <p style={{ fontSize: '0.72rem', color: '#71717a', marginBottom: '4px' }}>
+            {labelKey}: <strong style={{ color: '#09090b' }}>{label}</strong>
           </p>
-          <p style={{ fontSize: '0.82rem', color: 'var(--cyan-light)', fontWeight: 700 }}>
+          <p style={{ fontSize: '0.84rem', color: '#09090b', fontWeight: 700 }}>
             {valueKey}: {Number(payload[0].value).toLocaleString()}
           </p>
         </div>
@@ -139,57 +138,61 @@ export const Visualizer: React.FC<VisualizerProps> = ({ result, suggestedType = 
           gap: '12px'
         }}>
           <div style={{
-            background: 'var(--bg-surface)',
-            border: '1px solid var(--border)',
+            background: '#ffffff',
+            border: '1px solid #e4e4e7',
             borderRadius: 'var(--radius-md)',
-            padding: '12px 16px',
+            padding: '14px 18px',
+            boxShadow: 'var(--shadow-sm)',
           }}>
-            <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 600 }}>
+            <span style={{ fontSize: '0.7rem', color: '#71717a', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 600 }}>
               Sample Records
             </span>
-            <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#ffffff', marginTop: '4px' }}>
+            <div style={{ fontSize: '1.3rem', fontWeight: 800, color: '#09090b', marginTop: '4px' }}>
               {stats.count}
             </div>
           </div>
 
           <div style={{
-            background: 'var(--bg-surface)',
-            border: '1px solid var(--border)',
+            background: '#ffffff',
+            border: '1px solid #e4e4e7',
             borderRadius: 'var(--radius-md)',
-            padding: '12px 16px',
+            padding: '14px 18px',
+            boxShadow: 'var(--shadow-sm)',
           }}>
-            <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 600 }}>
+            <span style={{ fontSize: '0.7rem', color: '#71717a', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 600 }}>
               Total Sum ({valueKey})
             </span>
-            <div style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--accent-light)', marginTop: '4px' }}>
+            <div style={{ fontSize: '1.3rem', fontWeight: 800, color: '#09090b', marginTop: '4px' }}>
               {stats.sum}
             </div>
           </div>
 
           <div style={{
-            background: 'var(--bg-surface)',
-            border: '1px solid var(--border)',
+            background: '#ffffff',
+            border: '1px solid #e4e4e7',
             borderRadius: 'var(--radius-md)',
-            padding: '12px 16px',
+            padding: '14px 18px',
+            boxShadow: 'var(--shadow-sm)',
           }}>
-            <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 600 }}>
+            <span style={{ fontSize: '0.7rem', color: '#71717a', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 600 }}>
               Average Value
             </span>
-            <div style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--cyan-light)', marginTop: '4px' }}>
+            <div style={{ fontSize: '1.3rem', fontWeight: 800, color: '#09090b', marginTop: '4px' }}>
               {stats.avg}
             </div>
           </div>
 
           <div style={{
-            background: 'var(--bg-surface)',
-            border: '1px solid var(--border)',
+            background: '#ffffff',
+            border: '1px solid #e4e4e7',
             borderRadius: 'var(--radius-md)',
-            padding: '12px 16px',
+            padding: '14px 18px',
+            boxShadow: 'var(--shadow-sm)',
           }}>
-            <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 600 }}>
+            <span style={{ fontSize: '0.7rem', color: '#71717a', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 600 }}>
               Peak Value
             </span>
-            <div style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--green-light)', marginTop: '4px' }}>
+            <div style={{ fontSize: '1.3rem', fontWeight: 800, color: '#09090b', marginTop: '4px' }}>
               {stats.max}
             </div>
           </div>
@@ -198,11 +201,11 @@ export const Visualizer: React.FC<VisualizerProps> = ({ result, suggestedType = 
 
       {/* Chart Canvas Card */}
       <div style={{
-        background: 'var(--bg-surface)',
-        border: '1px solid var(--border)',
+        background: '#ffffff',
+        border: '1px solid #e4e4e7',
         borderRadius: 'var(--radius-lg)',
-        padding: '16px 20px 20px',
-        boxShadow: 'var(--shadow-md)'
+        padding: '18px 20px 22px',
+        boxShadow: 'var(--shadow-sm)'
       }}>
         {/* Chart Header Toolbar */}
         <div style={{
@@ -214,8 +217,8 @@ export const Visualizer: React.FC<VisualizerProps> = ({ result, suggestedType = 
           gap: '10px'
         }}>
           <div>
-            <span style={{ fontSize: '0.84rem', fontWeight: 700, color: '#ffffff' }}>
-              Visualizing <span style={{ color: 'var(--accent-light)' }}>{valueKey}</span> by <span style={{ color: 'var(--cyan-light)' }}>{labelKey}</span>
+            <span style={{ fontSize: '0.86rem', fontWeight: 700, color: '#09090b' }}>
+              Visualizing <span style={{ color: '#09090b', textDecoration: 'underline' }}>{valueKey}</span> by <span style={{ color: '#52525b' }}>{labelKey}</span>
             </span>
           </div>
 
@@ -257,60 +260,54 @@ export const Visualizer: React.FC<VisualizerProps> = ({ result, suggestedType = 
           <ResponsiveContainer>
             {chart === 'bar' ? (
               <BarChart data={data} margin={{ top: 10, right: 20, left: 10, bottom: 40 }}>
-                <defs>
-                  <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#8b5cf6" stopOpacity={0.9} />
-                    <stop offset="100%" stopColor="#06b6d4" stopOpacity={0.5} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
+                <CartesianGrid strokeDasharray="3 3" stroke="#e4e4e7" vertical={false} />
                 <XAxis
                   dataKey={labelKey}
-                  stroke="#64748b"
+                  stroke="#71717a"
                   fontSize={11}
                   angle={-25}
                   textAnchor="end"
                   interval={0}
                   tickLine={false}
                 />
-                <YAxis stroke="#64748b" fontSize={11} tickLine={false} axisLine={false} />
+                <YAxis stroke="#71717a" fontSize={11} tickLine={false} axisLine={false} />
                 <Tooltip content={customTooltip} />
-                <Bar dataKey={valueKey} fill="url(#barGradient)" radius={[6, 6, 0, 0]} />
+                <Bar dataKey={valueKey} fill="#09090b" radius={[4, 4, 0, 0]} />
               </BarChart>
             ) : chart === 'line' ? (
               <LineChart data={data} margin={{ top: 10, right: 20, left: 10, bottom: 40 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
-                <XAxis dataKey={labelKey} stroke="#64748b" fontSize={11} angle={-25} textAnchor="end" interval={0} tickLine={false} />
-                <YAxis stroke="#64748b" fontSize={11} tickLine={false} axisLine={false} />
+                <CartesianGrid strokeDasharray="3 3" stroke="#e4e4e7" vertical={false} />
+                <XAxis dataKey={labelKey} stroke="#71717a" fontSize={11} angle={-25} textAnchor="end" interval={0} tickLine={false} />
+                <YAxis stroke="#71717a" fontSize={11} tickLine={false} axisLine={false} />
                 <Tooltip content={customTooltip} />
                 <Line
                   type="monotone"
                   dataKey={valueKey}
-                  stroke="#06b6d4"
-                  strokeWidth={3}
-                  dot={{ fill: '#22d3ee', r: 4, strokeWidth: 2, stroke: '#0e1017' }}
-                  activeDot={{ r: 7, fill: '#8b5cf6' }}
+                  stroke="#09090b"
+                  strokeWidth={2.5}
+                  dot={{ fill: '#09090b', r: 4, strokeWidth: 2, stroke: '#ffffff' }}
+                  activeDot={{ r: 6, fill: '#09090b' }}
                 />
               </LineChart>
             ) : chart === 'area' ? (
               <AreaChart data={data} margin={{ top: 10, right: 20, left: 10, bottom: 40 }}>
                 <defs>
-                  <linearGradient id="areaGlow" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.4} />
-                    <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0} />
+                  <linearGradient id="areaMono" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#09090b" stopOpacity={0.25} />
+                    <stop offset="95%" stopColor="#09090b" stopOpacity={0.02} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
-                <XAxis dataKey={labelKey} stroke="#64748b" fontSize={11} angle={-25} textAnchor="end" interval={0} tickLine={false} />
-                <YAxis stroke="#64748b" fontSize={11} tickLine={false} axisLine={false} />
+                <CartesianGrid strokeDasharray="3 3" stroke="#e4e4e7" vertical={false} />
+                <XAxis dataKey={labelKey} stroke="#71717a" fontSize={11} angle={-25} textAnchor="end" interval={0} tickLine={false} />
+                <YAxis stroke="#71717a" fontSize={11} tickLine={false} axisLine={false} />
                 <Tooltip content={customTooltip} />
                 <Area
                   type="monotone"
                   dataKey={valueKey}
-                  stroke="#8b5cf6"
-                  strokeWidth={3}
+                  stroke="#09090b"
+                  strokeWidth={2.5}
                   fillOpacity={1}
-                  fill="url(#areaGlow)"
+                  fill="url(#areaMono)"
                 />
               </AreaChart>
             ) : (
@@ -324,15 +321,16 @@ export const Visualizer: React.FC<VisualizerProps> = ({ result, suggestedType = 
                   cy="50%"
                   outerRadius={120}
                   innerRadius={65}
-                  paddingAngle={3}
-                  stroke="none"
+                  paddingAngle={2}
+                  stroke="#ffffff"
+                  strokeWidth={1.5}
                 >
                   {data.map((_, i) => (
-                    <Cell key={i} fill={NEON_COLORS[i % NEON_COLORS.length]} />
+                    <Cell key={i} fill={MONOCHROME_COLORS[i % MONOCHROME_COLORS.length]} />
                   ))}
                 </Pie>
                 <Legend
-                  wrapperStyle={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}
+                  wrapperStyle={{ fontSize: '0.74rem', color: '#52525b' }}
                 />
               </PieChart>
             )}

@@ -65,29 +65,29 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   if (isCollapsed) {
     return (
-      <aside className="studio-sidebar collapsed animate-fade" style={{ alignItems: 'center', padding: '16px 0' }}>
+      <aside className="studio-sidebar collapsed animate-fade" style={{ alignItems: 'center', padding: '16px 0', background: '#fafafa', borderRight: '1px solid #e4e4e7' }}>
         <button
           onClick={onToggleCollapse}
           className="btn btn-ghost btn-sm"
           title="Expand Sidebar"
-          style={{ marginBottom: '20px', padding: '8px' }}
+          style={{ marginBottom: '20px', padding: '8px', color: '#09090b' }}
         >
-          <ArrowRightToLine size={16} color="var(--accent-light)" />
+          <ArrowRightToLine size={16} />
         </button>
 
         <div
           title={`Active DB: ${activeDbName}`}
           style={{
             width: '36px', height: '36px', borderRadius: 'var(--radius-sm)',
-            background: 'var(--accent-bg)', display: 'flex', alignItems: 'center',
+            background: '#ffffff', border: '1px solid #e4e4e7', display: 'flex', alignItems: 'center',
             justifyContent: 'center', marginBottom: '16px', cursor: 'pointer'
           }}
           onClick={onOpenUpload}
         >
-          <Database size={16} color="var(--accent)" />
+          <Database size={16} color="#09090b" />
         </div>
 
-        <div style={{ width: '28px', height: '1px', background: 'var(--border)', margin: '8px 0 16px' }} />
+        <div style={{ width: '28px', height: '1px', background: '#e4e4e7', margin: '8px 0 16px' }} />
 
         {/* Mini Table Icons */}
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '8px', overflowY: 'auto' }}>
@@ -99,8 +99,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
               className="btn btn-ghost btn-sm"
               style={{
                 width: '36px', height: '36px', padding: 0,
-                background: selectedTable === t.name ? 'var(--accent)' : 'transparent',
-                color: selectedTable === t.name ? '#fff' : 'var(--text-secondary)',
+                background: selectedTable === t.name ? '#09090b' : 'transparent',
+                color: selectedTable === t.name ? '#ffffff' : '#71717a',
                 borderRadius: 'var(--radius-sm)'
               }}
             >
@@ -113,42 +113,42 @@ export const Sidebar: React.FC<SidebarProps> = ({
           title="Gemini AI & SQLite Active"
           style={{ marginTop: 'auto', padding: '8px', display: 'flex', justifyContent: 'center' }}
         >
-          <Sparkles size={16} color="var(--green-light)" />
+          <Sparkles size={16} color="#09090b" />
         </div>
       </aside>
     );
   }
 
   return (
-    <aside className="studio-sidebar animate-fade">
+    <aside className="studio-sidebar animate-fade" style={{ background: '#fafafa', borderRight: '1px solid #e4e4e7' }}>
       {/* ─── BRAND HEADER ─── */}
       <div style={{
         padding: '16px 18px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        borderBottom: '1px solid var(--border)',
+        borderBottom: '1px solid #e4e4e7',
+        background: '#ffffff',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <div style={{
             width: '32px', height: '32px', borderRadius: 'var(--radius-md)',
-            background: 'linear-gradient(135deg, var(--accent) 0%, #06b6d4 100%)',
+            background: '#09090b',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            boxShadow: '0 2px 10px var(--accent-glow)'
           }}>
-            <Zap size={18} color="#ffffff" />
+            <Zap size={16} color="#ffffff" />
           </div>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span className="font-heading" style={{ fontSize: '1.05rem', fontWeight: 800, color: '#ffffff', letterSpacing: '-0.03em' }}>
+              <span className="font-heading" style={{ fontSize: '1.05rem', fontWeight: 800, color: '#09090b', letterSpacing: '-0.03em' }}>
                 BolDB
               </span>
               <span className="badge badge-purple" style={{ fontSize: '0.62rem', padding: '1px 5px' }}>
                 v2.0
               </span>
             </div>
-            <span style={{ fontSize: '0.66rem', color: 'var(--text-muted)', display: 'block', marginTop: '-2px' }}>
-              AI Database Copilot
+            <span style={{ fontSize: '0.68rem', color: '#71717a', display: 'block', marginTop: '-2px' }}>
+              AI Database Studio
             </span>
           </div>
         </div>
@@ -157,27 +157,28 @@ export const Sidebar: React.FC<SidebarProps> = ({
           onClick={onToggleCollapse}
           className="btn btn-ghost btn-xs"
           title="Collapse Sidebar"
-          style={{ padding: '5px' }}
+          style={{ padding: '5px', color: '#71717a' }}
         >
           <ArrowLeftToLine size={14} />
         </button>
       </div>
 
       {/* ─── ACTIVE DATABASE CARD ─── */}
-      <div style={{ padding: '14px 16px 10px', borderBottom: '1px solid var(--border)' }}>
+      <div style={{ padding: '14px 16px 10px', borderBottom: '1px solid #e4e4e7' }}>
         <div style={{
-          background: 'var(--bg-elevated)',
-          border: '1px solid var(--border)',
+          background: '#ffffff',
+          border: '1px solid #e4e4e7',
           borderRadius: 'var(--radius-md)',
           padding: '12px',
+          boxShadow: 'var(--shadow-sm)',
         }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', overflow: 'hidden' }}>
-              <Database size={13} color="var(--cyan-light)" />
+              <Database size={13} color="#09090b" />
               <span style={{
                 fontSize: '0.78rem',
                 fontWeight: 600,
-                color: 'var(--text)',
+                color: '#09090b',
                 whiteSpace: 'nowrap',
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
@@ -193,7 +194,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             )}
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.7rem', color: '#71717a' }}>
             <span>{tables.length} tables • {totalRows.toLocaleString()} rows</span>
             {canRollback && (
               <button
@@ -212,7 +213,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <button
               onClick={() => onLoadSample('ecommerce')}
               className="btn btn-xs btn-secondary"
-              style={{ flex: 1, fontSize: '0.66rem', padding: '4px 6px' }}
+              style={{ flex: 1, fontSize: '0.68rem', padding: '4px 6px' }}
               title="Load E-Commerce demo database"
             >
               🛒 E-Comm
@@ -220,14 +221,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <button
               onClick={() => onLoadSample('saas')}
               className="btn btn-xs btn-secondary"
-              style={{ flex: 1, fontSize: '0.66rem', padding: '4px 6px' }}
+              style={{ flex: 1, fontSize: '0.68rem', padding: '4px 6px' }}
               title="Load SaaS Metrics demo database"
             >
               🚀 SaaS
             </button>
             <button
               onClick={onOpenUpload}
-              className="btn btn-xs btn-cyan"
+              className="btn btn-xs btn-primary"
               style={{ padding: '4px 7px' }}
               title="Import Excel, CSV, JSON, or SQLite"
             >
@@ -245,7 +246,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             fontWeight: 700,
             textTransform: 'uppercase',
             letterSpacing: '0.08em',
-            color: 'var(--text-secondary)'
+            color: '#71717a'
           }}>
             Explorer
           </span>
@@ -257,7 +258,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           onClick={onRefreshSchema}
           className="btn btn-ghost btn-xs"
           title="Refresh Tables"
-          style={{ padding: '3px' }}
+          style={{ padding: '3px', color: '#71717a' }}
         >
           <RefreshCw size={11} />
         </button>
@@ -266,22 +267,22 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {/* Table search */}
       <div style={{ padding: '0 16px 8px' }}>
         <div style={{ position: 'relative' }}>
-          <Search size={12} color="var(--text-dim)" style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)' }} />
+          <Search size={12} color="#a1a1aa" style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)' }} />
           <input
             type="text"
             className="input"
             placeholder="Filter tables..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            style={{ paddingLeft: '28px', fontSize: '0.74rem', padding: '5px 8px 5px 28px' }}
+            style={{ paddingLeft: '28px', fontSize: '0.76rem', padding: '6px 8px 6px 28px' }}
           />
         </div>
       </div>
 
       {/* Tables list */}
-      <div style={{ flex: 1, overflowY: 'auto', padding: '0 10px', display: 'flex', flexDirection: 'column', gap: '2px' }}>
+      <div style={{ flex: 1, overflowY: 'auto', padding: '0 10px', display: 'flex', flexDirection: 'column', gap: '3px' }}>
         {filteredTables.length === 0 ? (
-          <div style={{ padding: '24px 12px', textAlign: 'center', color: 'var(--text-dim)', fontSize: '0.76rem' }}>
+          <div style={{ padding: '24px 12px', textAlign: 'center', color: '#a1a1aa', fontSize: '0.76rem' }}>
             <TableIcon size={20} style={{ margin: '0 auto 8px', opacity: 0.4 }} />
             <p>No tables found</p>
             <button onClick={onOpenUpload} className="btn btn-sm btn-primary" style={{ marginTop: '8px', fontSize: '0.72rem' }}>
@@ -298,8 +299,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 key={t.name}
                 style={{
                   borderRadius: 'var(--radius-sm)',
-                  background: isSelected ? 'var(--accent-bg)' : 'transparent',
-                  border: isSelected ? '1px solid rgba(139, 92, 246, 0.3)' : '1px solid transparent',
+                  background: isSelected ? '#09090b' : 'transparent',
                   transition: 'all 0.15s ease',
                   overflow: 'hidden'
                 }}
@@ -315,7 +315,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     userSelect: 'none',
                   }}
                   onMouseEnter={(e) => {
-                    if (!isSelected) e.currentTarget.style.background = 'rgba(255, 255, 255, 0.03)';
+                    if (!isSelected) e.currentTarget.style.background = '#f4f4f5';
                   }}
                   onMouseLeave={(e) => {
                     if (!isSelected) e.currentTarget.style.background = 'transparent';
@@ -324,15 +324,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   <div style={{ display: 'flex', alignItems: 'center', gap: '7px', overflow: 'hidden' }}>
                     <button
                       onClick={(e) => toggleExpand(t.name, e)}
-                      style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-dim)', padding: 0 }}
+                      style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: isSelected ? '#ffffff' : '#71717a', padding: 0 }}
                     >
                       {isExpanded ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
                     </button>
-                    <TableIcon size={13} color={isSelected ? 'var(--accent-light)' : 'var(--text-muted)'} />
+                    <TableIcon size={13} color={isSelected ? '#ffffff' : '#71717a'} />
                     <span style={{
                       fontSize: '0.78rem',
                       fontWeight: isSelected ? 600 : 500,
-                      color: isSelected ? '#ffffff' : 'var(--text)',
+                      color: isSelected ? '#ffffff' : '#09090b',
                       overflow: 'hidden',
                       textOverflow: 'ellipsis',
                       whiteSpace: 'nowrap',
@@ -343,10 +343,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
                   <span style={{
                     fontSize: '0.65rem',
-                    padding: '1px 5px',
+                    padding: '1px 6px',
                     borderRadius: 'var(--radius-full)',
-                    background: isSelected ? 'rgba(139, 92, 246, 0.25)' : 'var(--bg-elevated)',
-                    color: isSelected ? 'var(--accent-light)' : 'var(--text-dim)',
+                    background: isSelected ? '#27272a' : '#f4f4f5',
+                    color: isSelected ? '#ffffff' : '#71717a',
                     fontWeight: 600,
                   }}>
                     {t.rowCount}
@@ -356,20 +356,20 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 {/* Expanded columns preview */}
                 {isExpanded && t.columns && (
                   <div style={{
-                    padding: '4px 8px 8px 24px',
+                    padding: '6px 8px 8px 24px',
                     display: 'flex',
                     flexDirection: 'column',
                     gap: '3px',
-                    borderTop: '1px solid rgba(255, 255, 255, 0.03)',
-                    background: 'rgba(0, 0, 0, 0.15)'
+                    borderTop: isSelected ? '1px solid #27272a' : '1px solid #e4e4e7',
+                    background: isSelected ? '#18181b' : '#f8fafc'
                   }}>
                     {t.columns.map((c) => (
                       <div key={c.name} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.68rem' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                          {Boolean(c.pk) && <Key size={9} color="var(--amber)" />}
-                          <span style={{ color: 'var(--text-secondary)' }}>{c.name}</span>
+                          {Boolean(c.pk) && <Key size={9} color={isSelected ? '#facc15' : '#b45309'} />}
+                          <span style={{ color: isSelected ? '#ffffff' : '#52525b' }}>{c.name}</span>
                         </div>
-                        <span className="mono" style={{ fontSize: '0.62rem', color: 'var(--text-dim)' }}>
+                        <span className="mono" style={{ fontSize: '0.62rem', color: isSelected ? '#a1a1aa' : '#71717a' }}>
                           {c.type}
                         </span>
                       </div>
@@ -382,15 +382,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
         )}
       </div>
 
-      {/* ─── TRENDING AI PROMPTS ─── */}
+      {/* ─── QUICK PROMPTS ─── */}
       <div style={{
         padding: '12px 14px',
-        borderTop: '1px solid var(--border)',
-        background: 'rgba(14, 16, 23, 0.4)'
+        borderTop: '1px solid #e4e4e7',
+        background: '#ffffff'
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '5px', marginBottom: '8px' }}>
-          <Flame size={12} color="var(--pink-light)" />
-          <span style={{ fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--text-secondary)' }}>
+          <Flame size={12} color="#09090b" />
+          <span style={{ fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#71717a' }}>
             Quick Prompts
           </span>
         </div>
@@ -403,17 +403,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
               style={{
                 justifyContent: 'flex-start',
                 textAlign: 'left',
-                fontSize: '0.7rem',
-                color: 'var(--text-secondary)',
+                fontSize: '0.72rem',
+                color: '#52525b',
                 padding: '4px 6px',
                 borderRadius: 'var(--radius-xs)',
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.color = '#fff';
-                e.currentTarget.style.background = 'rgba(236, 72, 153, 0.08)';
+                e.currentTarget.style.color = '#000000';
+                e.currentTarget.style.background = '#f4f4f5';
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.color = 'var(--text-secondary)';
+                e.currentTarget.style.color = '#52525b';
                 e.currentTarget.style.background = 'transparent';
               }}
             >
@@ -426,11 +426,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {/* ─── FOOTER ─── */}
       <div style={{
         padding: '12px 16px',
-        borderTop: '1px solid var(--border)',
+        borderTop: '1px solid #e4e4e7',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        background: 'var(--bg-surface)'
+        background: '#ffffff'
       }}>
         <div
           style={{
@@ -441,16 +441,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
         >
           <span style={{
             width: '7px', height: '7px', borderRadius: '50%',
-            background: 'var(--green)',
-            boxShadow: '0 0 8px var(--green-glow)'
+            background: '#16a34a',
           }} />
-          <span style={{ fontSize: '0.72rem', fontWeight: 600, color: 'var(--text-secondary)' }}>
+          <span style={{ fontSize: '0.72rem', fontWeight: 600, color: '#52525b' }}>
             Gemini 2.5 Active
           </span>
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-          <span className="mono" style={{ fontSize: '0.62rem', color: 'var(--text-dim)' }}>
+          <span className="mono" style={{ fontSize: '0.62rem', color: '#a1a1aa' }}>
             WASM Live
           </span>
         </div>
