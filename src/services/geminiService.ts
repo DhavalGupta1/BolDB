@@ -93,8 +93,17 @@ DIALECT & RULES:
 3. If the user asks for read queries, use SELECT.
 4. If the user asks to modify, add, or delete data, generate the appropriate INSERT, UPDATE, or DELETE query.
 5. If column names or table names contain special characters or spaces, wrap them in double quotes (e.g. "tableName").
-6. Always return clean JSON matching the following structure:
+
+VALIDATION & RELEVANCE RULES:
+- If the user's prompt consists of random English words, keyboard mash/gibberish (e.g. "asdfghjk", "banana flying tree"), casual chit-chat (e.g. "hello", "how are you"), or text completely unrelated to querying, analyzing, or modifying the database:
+  You MUST set "isValid": false, "sql": "", and "explanation": "Please input valid text or a query related to the database."
+- If the prompt refers to concepts, tables, or entities that are completely absent from the database schema and cannot be answered by this database:
+  You MUST set "isValid": false, "sql": "", and "explanation": "The requested information is not present in this database. Please enter a query related to the available tables."
+- Only set "isValid": true when the prompt is a valid request that maps to a meaningful SQLite query on the provided schema.
+
+Output format (strict JSON):
 {
+  "isValid": true,
   "sql": "SELECT ... FROM ...",
   "explanation": "Brief 1-2 sentence description of what the query accomplishes and any filters applied.",
   "isMutation": false,
@@ -143,15 +152,32 @@ Chart Suggestion Rules:
       const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
 
       if (!rawText) {
-        throw new Error('Gemini returned an empty response.');
+        // If Gemini returned empty text or was filtered
+        return {
+          sql: '',
+          explanation: 'Please input valid text or a query related to the database.',
+          isMutation: false,
+          suggestedChartType: 'none',
+          isValid: false,
+        };
       }
 
-      const parsed = JSON.parse(rawText);
+      let cleanJson = rawText.trim();
+      if (cleanJson.startsWith('```json')) {
+        cleanJson = cleanJson.replace(/^```json\s*/i, '').replace(/\s*```$/, '');
+      } else if (cleanJson.startsWith('```')) {
+        cleanJson = cleanJson.replace(/^```\s*/, '').replace(/\s*```$/, '');
+      }
+
+      const parsed = JSON.parse(cleanJson);
+      const isValid = parsed.isValid !== false && Boolean(parsed.sql && parsed.sql.trim().length > 0);
+
       return {
-        sql: parsed.sql.trim(),
-        explanation: parsed.explanation || 'Executed generated SQL query.',
+        sql: parsed.sql ? parsed.sql.trim() : '',
+        explanation: parsed.explanation || (isValid ? 'Executed generated SQL query.' : 'Please input valid text or a query related to the database.'),
         isMutation: Boolean(parsed.isMutation),
         suggestedChartType: parsed.suggestedChartType || 'none',
+        isValid,
       };
     } catch (err: any) {
       console.warn('Gemini request failed, trying fallback model or error', err);
@@ -212,6 +238,7 @@ Fix the SQL so that it executes successfully on SQLite. Return JSON:
         explanation: `Finds the top 5 customers with the highest total expenditure, sorted in descending order.`,
         isMutation: false,
         suggestedChartType: 'bar',
+        isValid: true,
       };
     }
 
@@ -221,6 +248,7 @@ Fix the SQL so that it executes successfully on SQLite. Return JSON:
         explanation: `Aggregates products by category, showing total product count and average price per category.`,
         isMutation: false,
         suggestedChartType: 'bar',
+        isValid: true,
       };
     }
 
@@ -230,6 +258,7 @@ Fix the SQL so that it executes successfully on SQLite. Return JSON:
         explanation: `Groups all orders by their current fulfillment status with counts and total revenues.`,
         isMutation: false,
         suggestedChartType: 'pie',
+        isValid: true,
       };
     }
 
@@ -239,6 +268,7 @@ Fix the SQL so that it executes successfully on SQLite. Return JSON:
         explanation: `Updates all products in the 'Electronics' category by increasing their price by 10%.`,
         isMutation: true,
         suggestedChartType: 'none',
+        isValid: true,
       };
     }
 
@@ -248,15 +278,37 @@ Fix the SQL so that it executes successfully on SQLite. Return JSON:
         explanation: `Lists the top SaaS customer accounts by Monthly Recurring Revenue (MRR).`,
         isMutation: false,
         suggestedChartType: 'bar',
+        isValid: true,
       };
     }
 
-    // Generic fallback
+    if (p.includes('product') || p.includes('item') || p.includes('price') || p.includes('stock')) {
+      return {
+        sql: `SELECT name, category, price, stock_quantity FROM products ORDER BY price DESC LIMIT 10;`,
+        explanation: `Lists products sorted by price.`,
+        isMutation: false,
+        suggestedChartType: 'bar',
+        isValid: true,
+      };
+    }
+
+    if (p.includes('customer') || p.includes('user') || p.includes('client')) {
+      return {
+        sql: `SELECT name, email, country, total_spent FROM customers LIMIT 10;`,
+        explanation: `Lists customer records.`,
+        isMutation: false,
+        suggestedChartType: 'none',
+        isValid: true,
+      };
+    }
+
+    // Invalid input / random text / non-database prompt:
     return {
-      sql: `SELECT * FROM (SELECT name FROM sqlite_master WHERE type='table' LIMIT 1) LIMIT 10;`,
-      explanation: `(Demo Mode) Displaying sample rows. Set your Gemini API key in the top bar to unlock full natural language understanding for any custom query!`,
+      sql: '',
+      explanation: 'Please input valid text or a query related to the database (e.g., "Top 5 customers by spend", "Revenue by category").',
       isMutation: false,
       suggestedChartType: 'none',
+      isValid: false,
     };
   }
 }

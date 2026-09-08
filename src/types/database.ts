@@ -50,4 +50,5 @@ export interface GeminiResponse {
   isMutation: boolean;
   confidence?: number;
   suggestedChartType?: 'bar' | 'line' | 'pie' | 'none';
+  isValid?: boolean;
 }

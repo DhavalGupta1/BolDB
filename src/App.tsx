@@ -34,10 +34,11 @@ export const App: React.FC = () => {
   const [hasApiKey, setHasApiKey] = useState(geminiService.hasApiKey());
   const [pendingMutation, setPendingMutation] = useState<{ sql: string; explanation: string } | null>(null);
   const [toast, setToast] = useState<{ msg: string; type: string } | null>(null);
+  const [promptError, setPromptError] = useState<string | null>(null);
 
   const showToast = (msg: string, type = 'info') => {
     setToast({ msg, type });
-    setTimeout(() => setToast(null), 2500);
+    setTimeout(() => setToast(null), 3000);
   };
 
   const refreshDb = useCallback(async () => {
@@ -77,10 +78,20 @@ export const App: React.FC = () => {
   };
 
   const handlePrompt = async (prompt: string) => {
+    setPromptError(null);
     setIsAiLoading(true);
     try {
       const ctx = await sqliteService.getSchemaPromptContext();
       const ai = await geminiService.generateSql(prompt, ctx);
+
+      if (ai.isValid === false || !ai.sql || !ai.sql.trim()) {
+        const errorMsg = ai.explanation || 'Please input valid text or a query related to the database.';
+        setPromptError(errorMsg);
+        showToast(errorMsg, 'warning');
+        return;
+      }
+
+      setPromptError(null);
       setCurrentSql(ai.sql); setExplanation(ai.explanation);
       setIsMutation(ai.isMutation); setSuggestedChartType(ai.suggestedChartType || 'none');
       if (ai.isMutation) { setPendingMutation({ sql: ai.sql, explanation: ai.explanation }); }
@@ -88,7 +99,11 @@ export const App: React.FC = () => {
         await executeSql(ai.sql, ai.explanation);
         setActiveTab(ai.suggestedChartType && ai.suggestedChartType !== 'none' ? 'chart' : 'table');
       }
-    } catch (err: any) { showToast(err?.message, 'error'); }
+    } catch (err: any) {
+      const msg = err?.message || 'Failed to generate query.';
+      setPromptError(msg);
+      showToast(msg, 'error');
+    }
     finally { setIsAiLoading(false); }
   };
 
@@ -214,7 +229,12 @@ export const App: React.FC = () => {
       <div className="workspace">
         <div className="workspace-inner">
           {/* Prompt */}
-          <PromptBar onGenerate={handlePrompt} isLoading={isAiLoading} />
+          <PromptBar
+            onGenerate={handlePrompt}
+            isLoading={isAiLoading}
+            errorMessage={promptError}
+            onClearError={() => setPromptError(null)}
+          />
 
           {/* SQL Inspector */}
           {currentSql && (
@@ -262,6 +282,7 @@ export const App: React.FC = () => {
           setQueryResult(null);
           setSelectedTable(null);
           setCurrentSql('');
+          setPromptError(null);
           showToast('Created empty database', 'info');
         }}
       />
@@ -278,10 +299,11 @@ export const App: React.FC = () => {
         <div className="animate-slide-up" style={{
           position: 'fixed', bottom: '20px', left: '50%', transform: 'translateX(-50%)',
           padding: '8px 18px', borderRadius: 'var(--radius-full)',
-          background: toast.type === 'error' ? 'var(--red-bg)' : toast.type === 'success' ? 'var(--green-bg)' : 'var(--bg-elevated)',
-          border: `1px solid ${toast.type === 'error' ? 'rgba(248,113,113,0.2)' : toast.type === 'success' ? 'rgba(52,211,153,0.2)' : 'var(--border)'}`,
-          color: toast.type === 'error' ? 'var(--red)' : toast.type === 'success' ? 'var(--green)' : 'var(--text-secondary)',
+          background: toast.type === 'error' ? 'var(--red-bg)' : toast.type === 'warning' ? 'var(--amber-bg)' : toast.type === 'success' ? 'var(--green-bg)' : 'var(--bg-elevated)',
+          border: `1px solid ${toast.type === 'error' ? 'rgba(248,113,113,0.3)' : toast.type === 'warning' ? 'rgba(251,191,36,0.3)' : toast.type === 'success' ? 'rgba(52,211,153,0.3)' : 'var(--border)'}`,
+          color: toast.type === 'error' ? 'var(--red)' : toast.type === 'warning' ? 'var(--amber)' : toast.type === 'success' ? 'var(--green)' : 'var(--text-secondary)',
           fontSize: '0.78rem', zIndex: 999,
+          boxShadow: 'var(--shadow)',
         }}>
           {toast.msg}
         </div>
