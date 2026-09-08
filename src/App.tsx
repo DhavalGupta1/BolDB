@@ -10,22 +10,22 @@ import { DataGrid } from './components/DataGrid';
 import { Visualizer } from './components/Visualizer';
 import { SchemaView } from './components/SchemaView';
 import { FileUploadModal } from './components/FileUploadModal';
-import { ApiKeyModal } from './components/ApiKeyModal';
 import { MutationModal } from './components/MutationModal';
+import { UserAccountMenu } from './components/UserAccountMenu';
+import { authService, type UserAccount } from './services/authService';
 import type { TableSchema, QueryResult, DatabaseMetadata } from './types/database';
 import {
-  Database, Download, Key, RotateCcw, Upload, Table as TableIcon,
-  BarChart2, ChevronRight, Layers, ArrowLeft, User
+  Database, Download, RotateCcw, Upload, Table as TableIcon,
+  BarChart2, ChevronRight, Layers, ArrowLeft
 } from 'lucide-react';
 
 export const App: React.FC = () => {
   // Navigation View: 'landing' or 'studio'
   const [currentView, setCurrentView] = useState<'landing' | 'studio'>('landing');
 
-  // User State (Mock Authentication)
-  const [currentUser, setCurrentUser] = useState<{ name: string; email: string } | null>(() => {
-    const saved = localStorage.getItem('boldb_user');
-    return saved ? JSON.parse(saved) : null;
+  // User State
+  const [currentUser, setCurrentUser] = useState<UserAccount | null>(() => {
+    return authService.getCurrentUser();
   });
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
@@ -45,31 +45,33 @@ export const App: React.FC = () => {
   const [isExecuting, setIsExecuting] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isUploadOpen, setIsUploadOpen] = useState(false);
-  const [isApiKeyOpen, setIsApiKeyOpen] = useState(false);
-  const [hasApiKey, setHasApiKey] = useState(geminiService.hasApiKey());
+  const [hasApiKey] = useState(geminiService.hasApiKey());
   const [pendingMutation, setPendingMutation] = useState<{ sql: string; explanation: string } | null>(null);
   const [toast, setToast] = useState<{ msg: string; type: string } | null>(null);
-<<<<<<< HEAD
   const [promptError, setPromptError] = useState<string | null>(null);
-=======
   const [activePromptText, setActivePromptText] = useState('');
->>>>>>> d0037ad292eba21aed9ccf413224a414d4458c99
 
   const showToast = (msg: string, type = 'info') => {
     setToast({ msg, type });
     setTimeout(() => setToast(null), 3000);
   };
 
-  const handleLoginSuccess = (user: { name: string; email: string }) => {
+  const handleLoginSuccess = (user: UserAccount) => {
     setCurrentUser(user);
-    localStorage.setItem('boldb_user', JSON.stringify(user));
+    authService.setCurrentUser(user);
     showToast(`Welcome back, ${user.name}!`, 'success');
   };
 
   const handleSignOut = () => {
+    authService.signOut();
     setCurrentUser(null);
-    localStorage.removeItem('boldb_user');
     showToast('Signed out successfully', 'info');
+  };
+
+  const handleSwitchAccount = (user: UserAccount) => {
+    authService.setCurrentUser(user);
+    setCurrentUser(user);
+    showToast(`Switched account to ${user.name}`, 'success');
   };
 
   const refreshDb = useCallback(async () => {
@@ -122,7 +124,6 @@ export const App: React.FC = () => {
     try {
       const ctx = await sqliteService.getSchemaPromptContext();
       const ai = await geminiService.generateSql(prompt, ctx);
-<<<<<<< HEAD
 
       if (ai.isValid === false || !ai.sql || !ai.sql.trim()) {
         const errorMsg = ai.explanation || 'Please input valid text or a query related to the database.';
@@ -132,11 +133,6 @@ export const App: React.FC = () => {
       }
 
       setPromptError(null);
-      setCurrentSql(ai.sql); setExplanation(ai.explanation);
-      setIsMutation(ai.isMutation); setSuggestedChartType(ai.suggestedChartType || 'none');
-      if (ai.isMutation) { setPendingMutation({ sql: ai.sql, explanation: ai.explanation }); }
-      else {
-=======
       setCurrentSql(ai.sql);
       setExplanation(ai.explanation);
       setIsMutation(ai.isMutation);
@@ -145,7 +141,6 @@ export const App: React.FC = () => {
       if (ai.isMutation) {
         setPendingMutation({ sql: ai.sql, explanation: ai.explanation });
       } else {
->>>>>>> d0037ad292eba21aed9ccf413224a414d4458c99
         await executeSql(ai.sql, ai.explanation);
         if (ai.suggestedChartType && ai.suggestedChartType !== 'none') {
           setActiveTab('chart');
@@ -154,18 +149,12 @@ export const App: React.FC = () => {
         }
       }
     } catch (err: any) {
-<<<<<<< HEAD
       const msg = err?.message || 'Failed to generate query.';
       setPromptError(msg);
       showToast(msg, 'error');
-    }
-    finally { setIsAiLoading(false); }
-=======
-      showToast(err?.message || 'AI generation failed', 'error');
     } finally {
       setIsAiLoading(false);
     }
->>>>>>> d0037ad292eba21aed9ccf413224a414d4458c99
   };
 
   const handleAutoFix = async (failedSql: string, errorMsg: string) => {
@@ -262,6 +251,7 @@ export const App: React.FC = () => {
           onOpenSignUp={() => { setAuthMode('signup'); setIsAuthOpen(true); }}
           user={currentUser}
           onSignOut={handleSignOut}
+          onSwitchAccount={handleSwitchAccount}
         />
 
         <AuthModal
@@ -306,7 +296,6 @@ export const App: React.FC = () => {
         onSelectTable={previewTable}
         onRefreshSchema={refreshDb}
         onOpenUpload={() => setIsUploadOpen(true)}
-        onOpenApiKey={() => setIsApiKeyOpen(true)}
         onLoadSample={handleLoadSample}
         onQuickPrompt={(p) => {
           setActivePromptText(p);
@@ -361,16 +350,12 @@ export const App: React.FC = () => {
           {/* User & Actions */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             {currentUser ? (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <div style={{
-                  display: 'flex', alignItems: 'center', gap: '6px',
-                  padding: '4px 10px', borderRadius: 'var(--radius-full)',
-                  background: 'var(--bg-elevated)', border: '1px solid var(--border)'
-                }}>
-                  <User size={12} color="var(--accent-light)" />
-                  <span style={{ fontSize: '0.74rem', fontWeight: 600, color: '#fff' }}>{currentUser.name}</span>
-                </div>
-              </div>
+              <UserAccountMenu
+                user={currentUser}
+                onSignOut={handleSignOut}
+                onSwitchAccount={handleSwitchAccount}
+                onAddAccount={() => { setAuthMode('signup'); setIsAuthOpen(true); }}
+              />
             ) : (
               <button
                 onClick={() => { setAuthMode('signin'); setIsAuthOpen(true); }}
@@ -404,33 +389,6 @@ export const App: React.FC = () => {
             </button>
 
             <button
-              onClick={() => setIsApiKeyOpen(true)}
-              className="btn btn-secondary btn-sm"
-              style={{ gap: '6px' }}
-              title={hasApiKey ? 'Gemini AI: Connected' : 'Gemini AI: Needs Key'}
-            >
-              <Key size={13} color="var(--accent-light)" />
-              <span style={{
-                width: '6px', height: '6px', borderRadius: '50%',
-                background: hasApiKey ? 'var(--green)' : 'var(--amber)',
-                boxShadow: hasApiKey ? '0 0 6px var(--green-glow)' : 'none'
-              }} />
-              <span>AI Engine</span>
-            </button>
-
-<<<<<<< HEAD
-      {/* ─── MAIN WORKSPACE ─── */}
-      <div className="workspace">
-        <div className="workspace-inner">
-          {/* Prompt */}
-          <PromptBar
-            onGenerate={handlePrompt}
-            isLoading={isAiLoading}
-            errorMessage={promptError}
-            onClearError={() => setPromptError(null)}
-          />
-=======
-            <button
               onClick={handleDownload}
               className="btn btn-primary btn-sm"
               style={{ gap: '6px' }}
@@ -440,7 +398,6 @@ export const App: React.FC = () => {
             </button>
           </div>
         </header>
->>>>>>> d0037ad292eba21aed9ccf413224a414d4458c99
 
         {/* ─── SCROLLABLE WORKSPACE ─── */}
         <div className="workspace-scroll">
@@ -450,6 +407,8 @@ export const App: React.FC = () => {
               onGenerate={handlePrompt}
               isLoading={isAiLoading}
               externalPrompt={activePromptText}
+              errorMessage={promptError}
+              onClearError={() => setPromptError(null)}
             />
 
             {/* SQL Studio HUD */}
@@ -561,20 +520,9 @@ export const App: React.FC = () => {
           await refreshDb();
           setQueryResult(null);
           setSelectedTable(null);
-          setCurrentSql('');
-<<<<<<< HEAD
           setPromptError(null);
-          showToast('Created empty database', 'info');
-=======
           showToast('Created clean SQLite database', 'info');
->>>>>>> d0037ad292eba21aed9ccf413224a414d4458c99
         }}
-      />
-
-      <ApiKeyModal
-        isOpen={isApiKeyOpen}
-        onClose={() => setIsApiKeyOpen(false)}
-        onKeySaved={() => setHasApiKey(geminiService.hasApiKey())}
       />
 
       {pendingMutation && (
@@ -595,24 +543,15 @@ export const App: React.FC = () => {
       {/* ─── TOAST NOTIFICATION ─── */}
       {toast && (
         <div className="animate-slide-up" style={{
-<<<<<<< HEAD
-          position: 'fixed', bottom: '20px', left: '50%', transform: 'translateX(-50%)',
-          padding: '8px 18px', borderRadius: 'var(--radius-full)',
-          background: toast.type === 'error' ? 'var(--red-bg)' : toast.type === 'warning' ? 'var(--amber-bg)' : toast.type === 'success' ? 'var(--green-bg)' : 'var(--bg-elevated)',
-          border: `1px solid ${toast.type === 'error' ? 'rgba(248,113,113,0.3)' : toast.type === 'warning' ? 'rgba(251,191,36,0.3)' : toast.type === 'success' ? 'rgba(52,211,153,0.3)' : 'var(--border)'}`,
-          color: toast.type === 'error' ? 'var(--red)' : toast.type === 'warning' ? 'var(--amber)' : toast.type === 'success' ? 'var(--green)' : 'var(--text-secondary)',
-          fontSize: '0.78rem', zIndex: 999,
-          boxShadow: 'var(--shadow)',
-=======
           position: 'fixed',
           bottom: '24px',
           left: '50%',
           transform: 'translateX(-50%)',
           padding: '10px 20px',
           borderRadius: 'var(--radius-full)',
-          background: toast.type === 'error' ? 'var(--red-bg)' : toast.type === 'success' ? 'var(--green-bg)' : 'var(--bg-elevated)',
-          border: `1px solid ${toast.type === 'error' ? 'rgba(244,63,94,0.3)' : toast.type === 'success' ? 'rgba(16,185,129,0.3)' : 'var(--border)'}`,
-          color: toast.type === 'error' ? 'var(--red)' : toast.type === 'success' ? 'var(--green-light)' : '#ffffff',
+          background: toast.type === 'error' ? 'var(--red-bg)' : toast.type === 'warning' ? 'var(--amber-bg)' : toast.type === 'success' ? 'var(--green-bg)' : 'var(--bg-elevated)',
+          border: `1px solid ${toast.type === 'error' ? 'rgba(244,63,94,0.3)' : toast.type === 'warning' ? 'rgba(251,191,36,0.3)' : toast.type === 'success' ? 'rgba(16,185,129,0.3)' : 'var(--border)'}`,
+          color: toast.type === 'error' ? 'var(--red)' : toast.type === 'warning' ? 'var(--amber)' : toast.type === 'success' ? 'var(--green-light)' : '#ffffff',
           boxShadow: 'var(--shadow-lg)',
           fontSize: '0.8rem',
           fontWeight: 600,
@@ -620,9 +559,8 @@ export const App: React.FC = () => {
           display: 'flex',
           alignItems: 'center',
           gap: '8px'
->>>>>>> d0037ad292eba21aed9ccf413224a414d4458c99
         }}>
-          {toast.type === 'success' ? '✓' : toast.type === 'error' ? '⚠' : 'ℹ'} {toast.msg}
+          {toast.type === 'success' ? '✓' : toast.type === 'error' ? '⚠' : toast.type === 'warning' ? '⚠' : 'ℹ'} {toast.msg}
         </div>
       )}
     </div>

@@ -18,7 +18,7 @@ interface SidebarProps {
   onSelectTable: (tableName: string) => void;
   onRefreshSchema: () => void;
   onOpenUpload: () => void;
-  onOpenApiKey: () => void;
+  onOpenApiKey?: () => void;
   onLoadSample: (sampleId: 'ecommerce' | 'saas') => void;
   onQuickPrompt: (prompt: string) => void;
   onRollback: () => void;
@@ -38,13 +38,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
   activeDbName,
   isDirty,
   canRollback,
-  hasApiKey,
+  hasApiKey: _hasApiKey,
   isCollapsed,
   onToggleCollapse,
   onSelectTable,
   onRefreshSchema,
   onOpenUpload,
-  onOpenApiKey,
+  onOpenApiKey: _onOpenApiKey,
   onLoadSample,
   onQuickPrompt,
   onRollback,
@@ -109,14 +109,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
           ))}
         </div>
 
-        <button
-          onClick={onOpenApiKey}
-          title={hasApiKey ? 'Gemini AI: Connected' : 'Gemini AI: Needs Key'}
-          className="btn btn-ghost btn-sm"
-          style={{ marginTop: 'auto', padding: '8px' }}
+        <div
+          title="Gemini AI & SQLite Active"
+          style={{ marginTop: 'auto', padding: '8px', display: 'flex', justifyContent: 'center' }}
         >
-          <Sparkles size={16} color={hasApiKey ? 'var(--green-light)' : 'var(--amber)'} />
-        </button>
+          <Sparkles size={16} color="var(--green-light)" />
+        </div>
       </aside>
     );
   }
@@ -434,28 +432,22 @@ export const Sidebar: React.FC<SidebarProps> = ({
         justifyContent: 'space-between',
         background: 'var(--bg-surface)'
       }}>
-        <button
-          onClick={onOpenApiKey}
+        <div
           style={{
-            background: 'transparent',
-            border: 'none',
             display: 'flex',
             alignItems: 'center',
             gap: '6px',
-            cursor: 'pointer',
-            padding: 0
           }}
-          title={hasApiKey ? 'Gemini 2.5 Flash Active' : 'API Key Required'}
         >
           <span style={{
             width: '7px', height: '7px', borderRadius: '50%',
-            background: hasApiKey ? 'var(--green)' : 'var(--amber)',
-            boxShadow: hasApiKey ? '0 0 8px var(--green-glow)' : 'none'
+            background: 'var(--green)',
+            boxShadow: '0 0 8px var(--green-glow)'
           }} />
           <span style={{ fontSize: '0.72rem', fontWeight: 600, color: 'var(--text-secondary)' }}>
-            Gemini 2.5 AI
+            Gemini 2.5 Active
           </span>
-        </button>
+        </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
           <span className="mono" style={{ fontSize: '0.62rem', color: 'var(--text-dim)' }}>

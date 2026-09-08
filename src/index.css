@@ -73,10 +73,18 @@
   box-sizing: border-box;
 }
 
-html, body, #root {
-  height: 100%;
+html {
+  scroll-behavior: smooth;
+}
+
+html, body {
+  min-height: 100%;
   width: 100%;
-  overflow: hidden;
+}
+
+#root {
+  min-height: 100%;
+  width: 100%;
 }
 
 body {
@@ -318,6 +326,8 @@ code, pre, .mono {
   width: 100vw;
   overflow: hidden;
   background-color: var(--bg-app);
+  position: fixed;
+  inset: 0;
 }
 
 /* === SIDEBAR === */

@@ -5,13 +5,16 @@ import {
   BarChart3, FileSpreadsheet, CheckCircle2,
   Terminal, Layers, Cpu, Lock
 } from 'lucide-react';
+import type { UserAccount } from '../services/authService';
+import { UserAccountMenu } from './UserAccountMenu';
 
 interface LandingPageProps {
   onLaunchStudio: () => void;
   onOpenSignIn: () => void;
   onOpenSignUp: () => void;
-  user: { name: string; email: string } | null;
+  user: UserAccount | null;
   onSignOut: () => void;
+  onSwitchAccount?: (account: UserAccount) => void;
 }
 
 export const LandingPage: React.FC<LandingPageProps> = ({
@@ -20,6 +23,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   onOpenSignUp,
   user,
   onSignOut,
+  onSwitchAccount,
 }) => {
   const [activeDemoQuery, setActiveDemoQuery] = useState('Show top 5 customers by spend');
 
@@ -122,19 +126,12 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         {/* Auth & Launch CTAs */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           {user ? (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <div style={{
-                display: 'flex', alignItems: 'center', gap: '8px',
-                padding: '5px 12px', borderRadius: 'var(--radius-full)',
-                background: 'var(--bg-elevated)', border: '1px solid var(--border)'
-              }}>
-                <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--green-light)' }} />
-                <span style={{ fontSize: '0.8rem', fontWeight: 600, color: '#fff' }}>{user.name}</span>
-              </div>
-              <button onClick={onSignOut} className="btn btn-ghost btn-xs" style={{ fontSize: '0.72rem' }}>
-                Sign Out
-              </button>
-            </div>
+            <UserAccountMenu
+              user={user}
+              onSignOut={onSignOut}
+              onSwitchAccount={onSwitchAccount || (() => {})}
+              onAddAccount={onOpenSignUp}
+            />
           ) : (
             <>
               <button
@@ -306,8 +303,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         </div>
       </section>
 
-      {/* ─── METRICS STRIP (Matching Image 1 Bottom Bar) ─── */}
-      <section style={{
+      {/* ─── METRICS & ARCHITECTURE STRIP ─── */}
+      <section id="architecture" style={{
         borderTop: '1px solid rgba(255, 255, 255, 0.06)',
         borderBottom: '1px solid rgba(255, 255, 255, 0.06)',
         background: 'rgba(10, 12, 18, 0.5)',
@@ -607,8 +604,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             </p>
           </div>
 
-          {/* Feature 5 */}
-          <div style={{
+          {/* Feature 5 (Privacy & Security) */}
+          <div id="security" style={{
             background: 'var(--bg-surface)',
             border: '1px solid var(--border)',
             borderRadius: 'var(--radius-lg)',

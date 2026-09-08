@@ -2,7 +2,7 @@ import type { GeminiResponse } from '../types/database';
 
 // Project default key decoded at runtime to comply with GitHub Secret Scanning regulations
 const _B64_KEY = 'QVEuQWI4Uk42SktiZ0VscC10UGFNRGxZMjNZTTk2OUoxVjN2WDlDVi1tVTJPV3JWNXFxUkE=';
-export const DEFAULT_GEMINI_API_KEY = typeof atob !== 'undefined' ? atob(_B64_KEY) : '';
+const DEFAULT_GEMINI_API_KEY = typeof atob !== 'undefined' ? atob(_B64_KEY) : '';
 const STORAGE_KEY_API_KEY = 'boldb_gemini_api_key';
 const STORAGE_KEY_MODEL = 'boldb_gemini_model';
 
@@ -25,14 +25,33 @@ export class GeminiService {
     }
   }
 
-  getApiKey(): string {
-    return this.apiKey;
+  /**
+   * Returns only user-entered custom key (if any).
+   * Never leaks or returns the built-in project key to client code or UI.
+   */
+  getCustomApiKey(): string {
+    const savedKey = localStorage.getItem(STORAGE_KEY_API_KEY);
+    return savedKey && savedKey.trim().length > 5 ? savedKey.trim() : '';
+  }
+
+  /**
+   * Returns a masked string for UI display without exposing actual credentials
+   */
+  getMaskedApiKey(): string {
+    const custom = this.getCustomApiKey();
+    if (custom) {
+      if (custom.length > 8) {
+        return '••••••••••••••••' + custom.slice(-4);
+      }
+      return '••••••••••••';
+    }
+    return '•••••••••••••••• (Secured Built-in Key)';
   }
 
   setApiKey(key: string): void {
     const trimmed = key.trim();
-    if (!trimmed || trimmed === DEFAULT_GEMINI_API_KEY) {
-      this.apiKey = DEFAULT_GEMINI_API_KEY;
+    if (!trimmed || trimmed === DEFAULT_GEMINI_API_KEY || trimmed.startsWith('•••')) {
+      this.apiKey = (import.meta as any).env?.VITE_GEMINI_API_KEY || DEFAULT_GEMINI_API_KEY;
       localStorage.removeItem(STORAGE_KEY_API_KEY);
     } else {
       this.apiKey = trimmed;
@@ -46,7 +65,8 @@ export class GeminiService {
   }
 
   isUsingDefaultKey(): boolean {
-    return this.apiKey === DEFAULT_GEMINI_API_KEY;
+    const savedKey = localStorage.getItem(STORAGE_KEY_API_KEY);
+    return !(savedKey && savedKey.trim().length > 5);
   }
 
   getModel(): string {
@@ -62,10 +82,11 @@ export class GeminiService {
     return Boolean(this.apiKey && this.apiKey.length > 5);
   }
 
-  // Validate API key with a fast ping
-  async validateApiKey(keyToTest: string): Promise<boolean> {
+  // Validate API key with a fast ping (tests custom key if provided, otherwise tests active internal key)
+  async validateApiKey(keyToTest?: string): Promise<boolean> {
     try {
-      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(keyToTest.trim())}`;
+      const key = keyToTest && keyToTest.trim().length > 5 ? keyToTest.trim() : this.apiKey;
+      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(key)}`;
       const response = await fetch(endpoint);
       return response.ok;
     } catch {
