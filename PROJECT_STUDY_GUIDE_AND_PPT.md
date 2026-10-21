@@ -149,44 +149,38 @@ If an AI-generated query triggers an execution error (e.g. unknown column or syn
 
 ---
 
-## Slide 6: Cryptographic Hashing in Authentication (Sign In & Sign Up)
+## Slide 6: Authentication, Cryptographic Hashing & Email Verification
 
-### How Hashing Works in BolDB
-In `src/services/authService.ts`, authentication security is implemented using the W3C standard **Web Crypto API** (`window.crypto.subtle`).
+### End-to-End User Registration & Verification Flow
+BolDB implements a hardened authentication lifecycle with **strict duplicate user prevention**, **2-step email verification**, and **salted SHA-256 cryptographic hashing**:
 
 ```
-                    ┌─────────────────────────┐
-                    │ User Enters Password    │
-                    └───────────┬─────────────┘
-                                │
-                                ▼
-                    ┌─────────────────────────┐
-                    │ Generate 128-bit Salt   │ (crypto.getRandomValues)
-                    │ (Random 32-char Hex)    │
-                    └───────────┬─────────────┘
-                                │
-                                ▼
-                    ┌─────────────────────────┐
-                    │ Salt + ":" + Password   │
-                    └───────────┬─────────────┘
-                                │
-                                ▼
-                    ┌─────────────────────────┐
-                    │ SHA-256 Digest Function │ (crypto.subtle.digest)
-                    └───────────┬─────────────┘
-                                │
-                                ▼
-                    ┌─────────────────────────┐
-                    │ 64-character Hex Hash   │
-                    └───────────┬─────────────┘
-                                │
-                ┌───────────────┴───────────────┐
-                ▼                               ▼
-       [Registration / Sign Up]         [Verification / Sign In]
-   Store (Salt + PasswordHash)      Hash(Input + Stored Salt) == StoredHash
+[Sign Up Form]
+  ├─► Full Name (min. 2 chars)
+  ├─► Email Address (regex validation)
+  ├─► Duplicate Check: isEmailRegistered(email)?
+  │      └─► If duplicate exists: REJECT with clear message
+  ├─► Password (min. 6 chars)
+  └─► Confirm Password (real-time equality check)
+          │
+          ▼
+[Step 1: Pending Registration & Code Generation]
+  ├─► Generate 128-bit CSPRNG Salt (crypto.getRandomValues)
+  ├─► Compute SHA-256 Hash of (salt + password)
+  ├─► Generate 6-digit Secure OTP Verification Code
+  └─► Store in Pending Session (expires in 10 minutes)
+          │
+          ▼
+[Step 2: Interactive Email Verification Screen]
+  ├─► User Enters 6-Digit Code (with auto-fill & resend cooldown)
+  └─► confirmEmailVerification(email, code)
+          │
+          ▼
+[Permanent Account Activation]
+  └─► isVerified = true, verifiedAt = Date.now(), Session Stored
 ```
 
-### The Three Cryptographic Functions in `authService.ts`:
+### The Core Cryptographic & Verification Functions in `authService.ts`:
 
 #### 1. Salt Generation: `generateSalt(byteLength = 16)`
 ```typescript
@@ -212,15 +206,11 @@ export async function hashPassword(password: string, salt: string): Promise<stri
 ```
 *Why it matters:* A one-way cryptographic hash with pre-image resistance. Even if two users choose the exact same password, their unique salts produce completely distinct hash digests, neutralizing rainbow table attacks.
 
-#### 3. Verification: `verifyPassword(password, storedHash, salt)`
-```typescript
-export async function verifyPassword(password: string, storedHash: string, salt: string): Promise<boolean> {
-  if (!password || !storedHash || !salt) return false;
-  const computedHash = await hashPassword(password, salt);
-  return computedHash === storedHash;
-}
-```
-*Why it matters:* Recomputes the hash using the stored salt and tests for mathematical equality without ever exposing the password.
+#### 3. Duplicate Prevention & Verification Handlers:
+- `isEmailRegistered(email)`: Case-insensitive scan across registered accounts to prevent duplicate registrations.
+- `requestEmailVerification(name, email, password)`: Validates credentials, generates salt + hash + 6-digit code, and creates pending session.
+- `confirmEmailVerification(email, code)`: Verifies code, checks expiration, and permanently provisions the verified account.
+- `loginUser(email, password)`: Computes hash with stored salt and verifies credentials.
 
 ---
 
@@ -239,13 +229,19 @@ export async function verifyPassword(password: string, storedHash: string, salt:
 
 ## Slide 8: Professor Defense & Viva Q&A Guide
 
-### Q1: "Where is the database hosted? Is there a backend server running SQLite or PostgreSQL?"
+### Q1: "How does the system prevent duplicate user registrations and handle email verification?"
+> **Answer**: 
+> "BolDB uses a **two-step verification protocol**. Before any account is created, `authService.isEmailRegistered()` performs a case-insensitive lookup to reject duplicate emails immediately. On submission, the system validates the email format, verifies password matching, generates a **128-bit salt** and **SHA-256 hash**, and creates a **6-digit verification code** with a 10-minute expiry. The user must verify the code on the verification screen before the account is activated and marked `isVerified: true`."
+
+---
+
+### Q2: "Where is the database hosted? Is there a backend server running SQLite or PostgreSQL?"
 > **Answer**: 
 > "No backend database server is required. BolDB runs **SQLite compiled to WebAssembly (WASM)** directly in the browser's JavaScript runtime using the `sql.js` library. The database file exists as a binary byte array in the browser tab's allocated memory. This delivers sub-millisecond query execution with zero network round trips and zero hosting costs."
 
 ---
 
-### Q2: "How do you ensure data privacy when you send queries to Google Gemini?"
+### Q3: "How do you ensure data privacy when you send queries to Google Gemini?"
 > **Answer**: 
 > "BolDB implements strict **Schema-Only Context Grounding**. When generating SQL, the application extracts only table names, column names, and column data types using SQLite `PRAGMA table_info`. **No row data, customer records, or financial figures are ever sent to Gemini**. The LLM generates the SQL based solely on the schema structure, and the resulting query is executed locally inside the browser."
 
