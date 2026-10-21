@@ -31,20 +31,20 @@ export const LandingPage: React.FC<LandingPageProps> = ({
     'Show top 5 customers by spend': {
       sql: 'SELECT c.name, SUM(o.total_amount) as total_spent FROM customers c JOIN orders o ON c.id = o.customer_id GROUP BY c.id ORDER BY total_spent DESC LIMIT 5;',
       rows: [
-        { name: 'Marcus Vance', spent: '$4,820.00', orders: 8 },
-        { name: 'Elena Rostova', spent: '$3,910.50', orders: 6 },
-        { name: 'Devon Hayes', spent: '$2,840.20', orders: 5 },
-        { name: 'Sarah Lin', spent: '$2,190.00', orders: 4 },
-        { name: 'Kaelen Morse', spent: '$1,950.80', orders: 3 },
+        { name: 'Marcus Vance', spent: '₹4,820.00', orders: 8 },
+        { name: 'Elena Rostova', spent: '₹3,910.50', orders: 6 },
+        { name: 'Devon Hayes', spent: '₹2,840.20', orders: 5 },
+        { name: 'Sarah Lin', spent: '₹2,190.00', orders: 4 },
+        { name: 'Kaelen Morse', spent: '₹1,950.80', orders: 3 },
       ],
     },
     'Revenue by category': {
       sql: 'SELECT p.category, SUM(oi.quantity * oi.unit_price) as revenue FROM order_items oi JOIN products p ON oi.product_id = p.id GROUP BY p.category ORDER BY revenue DESC;',
       rows: [
-        { name: 'Electronics', spent: '$18,450.00', orders: 120 },
-        { name: 'Footwear', spent: '$9,280.50', orders: 64 },
-        { name: 'Apparel', spent: '$6,420.00', orders: 48 },
-        { name: 'Accessories', spent: '$4,110.00', orders: 35 },
+        { name: 'Electronics', spent: '₹18,450.00', orders: 120 },
+        { name: 'Footwear', spent: '₹9,280.50', orders: 64 },
+        { name: 'Apparel', spent: '₹6,420.00', orders: 48 },
+        { name: 'Accessories', spent: '₹4,110.00', orders: 35 },
       ],
     },
     'Low stock alerts': {

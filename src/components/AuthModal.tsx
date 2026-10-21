@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Sparkles, Mail, Lock, User, ArrowRight, ArrowLeft, Plus } from 'lucide-react';
+import { X, Sparkles, Mail, Lock, User, ArrowRight, ArrowLeft, Plus, Eye, EyeOff, ShieldCheck, AlertCircle } from 'lucide-react';
 import { authService, type UserAccount } from '../services/authService';
 
 interface AuthModalProps {
@@ -22,6 +22,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   // Custom OAuth inputs
@@ -38,6 +40,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     setAuthView('main');
     setShowCustomGoogle(false);
     setShowCustomGithub(false);
+    setErrorMessage('');
   }, [initialMode, isOpen]);
 
   if (!isOpen) return null;
@@ -48,6 +51,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
   const handleSelectAccount = (acc: UserAccount) => {
     setIsLoading(true);
+    setErrorMessage('');
     setTimeout(() => {
       setIsLoading(false);
       authService.setCurrentUser(acc);
@@ -56,26 +60,38 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     }, 300);
   };
 
-  const handleEmailSubmit = (e: React.FormEvent) => {
+  const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email.trim()) return;
+    setErrorMessage('');
+
+    if (!email.trim()) {
+      setErrorMessage('Please enter an email address.');
+      return;
+    }
+    if (!password) {
+      setErrorMessage('Please enter your password.');
+      return;
+    }
+    if (mode === 'signup' && password.length < 6) {
+      setErrorMessage('Password must be at least 6 characters long.');
+      return;
+    }
 
     setIsLoading(true);
-    setTimeout(() => {
+    try {
+      let userAccount: UserAccount;
+      if (mode === 'signup') {
+        userAccount = await authService.registerUser(name, email, password);
+      } else {
+        userAccount = await authService.loginUser(email, password);
+      }
       setIsLoading(false);
-      const displayName = name.trim() || email.split('@')[0];
-
-      const userAccount: UserAccount = {
-        id: `email-${Date.now()}`,
-        name: displayName,
-        email: email.trim().toLowerCase(),
-        provider: 'email',
-      };
-
-      authService.setCurrentUser(userAccount);
       onLoginSuccess(userAccount);
       onClose();
-    }, 400);
+    } catch (err: any) {
+      setIsLoading(false);
+      setErrorMessage(err?.message || 'Authentication failed. Please try again.');
+    }
   };
 
   const handleCustomGoogleSubmit = (e: React.FormEvent) => {
@@ -462,7 +478,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               }}
             >
               <button
-                onClick={() => setMode('signin')}
+                onClick={() => { setMode('signin'); setErrorMessage(''); }}
                 style={{
                   padding: '7px 12px',
                   fontSize: '0.8rem',
@@ -479,7 +495,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 Sign In
               </button>
               <button
-                onClick={() => setMode('signup')}
+                onClick={() => { setMode('signup'); setErrorMessage(''); }}
                 style={{
                   padding: '7px 12px',
                   fontSize: '0.8rem',
@@ -496,6 +512,29 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 Create Account
               </button>
             </div>
+
+            {/* Error Message Alert */}
+            {errorMessage && (
+              <div
+                className="animate-slide-up"
+                style={{
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  gap: '8px',
+                  padding: '9px 12px',
+                  borderRadius: 'var(--radius-sm)',
+                  background: '#fef2f2',
+                  border: '1px solid #fecaca',
+                  color: '#b91c1c',
+                  fontSize: '0.78rem',
+                  marginBottom: '14px',
+                  lineHeight: 1.4,
+                }}
+              >
+                <AlertCircle size={15} style={{ flexShrink: 0, marginTop: '2px' }} />
+                <span>{errorMessage}</span>
+              </div>
+            )}
 
             {/* Social Logins */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '16px' }}>
@@ -593,10 +632,13 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               <div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '5px' }}>
                   <label style={{ fontSize: '0.72rem', fontWeight: 600, color: '#52525b' }}>
-                    Password
+                    Password {mode === 'signup' && <span style={{ color: '#71717a', fontWeight: 400 }}>(min. 6 chars)</span>}
                   </label>
                   {mode === 'signin' && (
-                    <span style={{ fontSize: '0.68rem', color: '#09090b', cursor: 'pointer', fontWeight: 500 }}>
+                    <span
+                      onClick={() => setErrorMessage('Demo account password: password123')}
+                      style={{ fontSize: '0.68rem', color: '#09090b', cursor: 'pointer', fontWeight: 500 }}
+                    >
                       Forgot password?
                     </span>
                   )}
@@ -604,16 +646,62 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 <div style={{ position: 'relative' }}>
                   <Lock size={14} color="#a1a1aa" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
                   <input
-                    type="password"
+                    type={showPassword ? 'text' : 'password'}
                     required
-                    placeholder="••••••••••••"
+                    placeholder={mode === 'signup' ? 'Create a secure password' : '••••••••••••'}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className="input"
-                    style={{ paddingLeft: '34px' }}
+                    style={{ paddingLeft: '34px', paddingRight: '36px' }}
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    style={{
+                      position: 'absolute',
+                      right: '10px',
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                      background: 'none',
+                      border: 'none',
+                      cursor: 'pointer',
+                      color: '#a1a1aa',
+                      display: 'flex',
+                      alignItems: 'center',
+                      padding: 0,
+                    }}
+                    title={showPassword ? 'Hide password' : 'Show password'}
+                  >
+                    {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+                  </button>
                 </div>
               </div>
+
+              {/* SHA-256 Security Indicator */}
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  background: '#f8fafc',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: 'var(--radius-sm)',
+                  padding: '6px 10px',
+                  fontSize: '0.7rem',
+                  color: '#475569',
+                }}
+              >
+                <ShieldCheck size={14} color="#16a34a" />
+                <span>
+                  <strong>Cryptographic Security:</strong> SHA-256 hash + 128-bit random salt
+                </span>
+              </div>
+
+              {mode === 'signin' && (
+                <div style={{ fontSize: '0.68rem', color: '#71717a' }}>
+                  Tip: Pre-configured test account: <code style={{ background: '#f4f4f5', padding: '1px 4px', borderRadius: '3px' }}>demo@boldb.ai</code> / <code style={{ background: '#f4f4f5', padding: '1px 4px', borderRadius: '3px' }}>password123</code>
+                </div>
+              )}
 
               <button
                 type="submit"
@@ -625,15 +713,15 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   fontSize: '0.84rem',
                   fontWeight: 600,
                   borderRadius: 'var(--radius-md)',
-                  marginTop: '6px',
+                  marginTop: '4px',
                   gap: '6px',
                 }}
               >
                 {isLoading ? (
-                  <span>Authenticating...</span>
+                  <span>Computing SHA-256 & Verifying...</span>
                 ) : (
                   <>
-                    <span>{mode === 'signin' ? 'Sign In to BolDB' : 'Create Free Account'}</span>
+                    <span>{mode === 'signin' ? 'Sign In with Hashed Verification' : 'Create Account (Salted Hash)'}</span>
                     <ArrowRight size={14} />
                   </>
                 )}
@@ -642,7 +730,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
             {/* Footer info */}
             <p style={{ fontSize: '0.7rem', color: '#71717a', textAlign: 'center', marginTop: '16px', lineHeight: 1.4 }}>
-              Zero credentials stored on remote servers. Sessions securely managed in browser storage.
+              Zero raw credentials stored. Hashed & salted locally via Web Crypto API standard.
             </p>
           </>
         )}
